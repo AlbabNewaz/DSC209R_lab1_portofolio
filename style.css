@@ -1,6 +1,7 @@
 body {
-  /* Set line height to 1.5 times the font size
-	   and use the OS’s UI font as the website font
-	 */
   font: 100%/1.5 system-ui;
+  max-width: 100ch; /* keeps text from being too wide */
+  margin-inline: auto; /* centers the body horizontally */
+  padding-inline: 1em; /* adds space on small screens */
+  box-sizing: border-box;
 }
