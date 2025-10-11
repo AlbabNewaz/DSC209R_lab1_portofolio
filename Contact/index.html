@@ -15,29 +15,23 @@
     <a href="../Resume/index.html">Resume</a>
     <a href="https://github.com/AlbabNewaz" target="_blank">GitHub</a>
   </nav>
-<form action="mailto:anewaz@ucsd.edu" method="POST" enctype="text/plain">
-  <label>
-    Your Email:
-    <input type="email" name="email" value="" required />
-  </label>
-  <br />
 
-  <label>
-    Subject:
-    <input name="subject" value="" />
-  </label>
-  <br />
-
-  <label>
-    Message:
-    <textarea name="body" rows="5" cols="40"></textarea>
-  </label>
-  <br />
-
-  <button>Send</button>
-</form>
   <h1>Contact</h1>
-  <p></p>
+
+  <form action="mailto:anewaz@ucsd.edu" method="POST" enctype="text/plain">
+    <label for="email">Your Email:</label>
+    <input id="email" type="email" name="email" required />
+
+    <label for="subject">Subject:</label>
+    <input id="subject" name="subject" />
+
+    <label for="body">Message:</label>
+    <textarea id="body" name="body" rows="5"></textarea>
+
+    <button type="submit">Send</button>
+  </form>
 
 </body>
+</html>
+
 </html>
