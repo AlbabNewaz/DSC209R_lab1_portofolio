@@ -6,9 +6,9 @@ function $$(selector, context = document) {
 
 const pages = [
   { url: '', title: 'Home' },
-  { url: 'projects/index.html', title: 'Projects' },
-  { url: 'Contact/index.html', title: 'Contact' },
-  { url: 'Resume/index.html', title: 'Resume' },
+  { url: 'projects/', title: 'Projects' },
+  { url: 'Contact/', title: 'Contact' },
+  { url: 'Resume/', title: 'Resume' },
   { url: 'https://github.com/AlbabNewaz', title: 'GitHub' },
 ];
 
@@ -34,9 +34,7 @@ for (let p of pages) {
   a.href = url;
   a.textContent = title;
 
-  const currentPath = location.pathname.replace(/\/$/, '');
-  const linkPath = a.pathname.replace(/\/$/, '');
-  if (currentPath === linkPath) {
+  if (a.host === location.host && a.pathname === location.pathname) {
     a.classList.add('current');
   }
 
@@ -47,6 +45,7 @@ for (let p of pages) {
   nav.append(a);
 }
 
+// Theme selector
 document.body.insertAdjacentHTML(
   'afterbegin',
   `
@@ -71,14 +70,12 @@ function applyTheme(theme) {
   }
 }
 
-const savedTheme = localStorage.getItem('colorScheme');
-if (savedTheme) {
-  colorSelect.value = savedTheme;
-  applyTheme(savedTheme);
-}
+const savedTheme = localStorage.getItem('theme') || 'light dark';
+colorSelect.value = savedTheme;
+applyTheme(savedTheme);
 
 colorSelect.addEventListener('change', () => {
-  const theme = colorSelect.value;
-  applyTheme(theme);
-  localStorage.setItem('colorScheme', theme);
+  const selectedTheme = colorSelect.value;
+  applyTheme(selectedTheme);
+  localStorage.setItem('theme', selectedTheme);
 });

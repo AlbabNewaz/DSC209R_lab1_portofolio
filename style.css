@@ -1,19 +1,22 @@
 html {
   color-scheme: light dark;
+}
+
+body {
   font: 100%/1.5 system-ui;
   margin: 0;
   padding: 0;
   max-width: 60rem;
   margin-inline: auto;
   padding-inline: 1rem;
-  background-color: oklch(98% 2% 200); /* light mode background */
-  color: black; /* light mode text */
+  background-color: oklch(98% 2% 200);
+  color: black; 
   transition: background-color 0.3s, color 0.3s;
 }
 
-body {
-  margin: 0;
-  padding: 0;
+html[data-color-scheme='dark'] body {
+  background-color: oklch(10% 2% 220);
+  color: #eee; 
 }
 
 nav {
@@ -23,8 +26,12 @@ nav {
   gap: 1rem;
   padding: 1rem;
   border-bottom: 2px solid var(--border-color, oklch(50% 10% 200 / 40%));
-  background-color: oklch(98% 2% 200);
+  background-color: oklch(98% 2% 200); 
   transition: background-color 0.3s, color 0.3s;
+}
+
+html[data-color-scheme='dark'] nav {
+  background-color: oklch(15% 5% 240);
 }
 
 nav a {
@@ -36,15 +43,26 @@ nav a {
   transition: color 0.3s, background-color 0.3s;
 }
 
+html[data-color-scheme='dark'] nav a {
+  color: #eee;
+}
+
 nav a:hover {
-  background-color: oklch(90% 40% 320 / 50%);
-  color: black;
+  background-color: oklch(90% 40% 300 / 30%); 
+}
+
+html[data-color-scheme='dark'] nav a:hover {
+  background-color: oklch(30% 40% 300 / 50%);
 }
 
 nav a.current {
   color: #f777b0;
   font-weight: bold;
   background-color: oklch(80% 20% 320 / 40%);
+}
+
+html[data-color-scheme='dark'] nav a.current {
+  background-color: oklch(50% 20% 320 / 60%);
 }
 
 .color-scheme {
@@ -90,6 +108,16 @@ button {
   border-radius: 0.25rem;
   width: 100%;
   box-sizing: border-box;
+  background-color: white;
+  color: black;
+}
+
+html[data-color-scheme='dark'] input,
+html[data-color-scheme='dark'] textarea,
+html[data-color-scheme='dark'] button {
+  background-color: oklch(15% 5% 240);
+  color: #eee;
+  border-color: oklch(40% 5% 220 / 50%);
 }
 
 textarea {
@@ -130,6 +158,11 @@ button:hover {
   transition: transform 0.2s, box-shadow 0.2s, background-color 0.3s, border-color 0.3s;
 }
 
+html[data-color-scheme='dark'] .project {
+  background-color: oklch(20% 5% 200 / 50%);
+  border-color: oklch(30% 5% 200 / 50%);
+}
+
 .project:hover {
   transform: translateY(-4px);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
@@ -148,7 +181,6 @@ button:hover {
 
 .project p {
   margin: 0;
-  color: #333;
   line-height: 1.4;
 }
 
@@ -161,70 +193,9 @@ button:hover {
 .resume section {
   border-left: 4px solid #0077cc;
   padding-left: 1rem;
-}
-
-.resume h2 {
-  font-size: 1.5rem;
-  color: #0077cc;
-  margin-bottom: 0.5rem;
-}
-
-.resume h3 {
-  font-size: 1.2rem;
-  margin: 0.25rem 0;
-}
-
-.resume p,
-.resume li,
-.resume time {
-  margin: 0.25rem 0;
-  line-height: 1.4;
-}
-
-.resume ul {
-  padding-left: 1.25rem;
-  list-style-type: disc;
-}
-
-.resume time {
-  font-weight: 500;
-  color: #555;
-}
-
-/* Dark mode styling */
-html[data-color-scheme='dark'] {
-  background-color: oklch(15% 5% 240);
-  color: #eee;
-}
-
-html[data-color-scheme='dark'] nav {
-  background-color: oklch(15% 5% 240);
-}
-
-html[data-color-scheme='dark'] nav a {
-  color: #eee;
-}
-
-html[data-color-scheme='dark'] nav a:hover {
-  background-color: oklch(30% 40% 320 / 60%);
-  color: #eee;
-}
-
-html[data-color-scheme='dark'] nav a.current {
-  background-color: oklch(50% 20% 320 / 60%);
-  color: #fff;
-}
-
-html[data-color-scheme='dark'] .project {
-  background-color: oklch(20% 5% 240 / 30%);
-  border-color: oklch(50% 10% 200 / 30%);
+  transition: border-color 0.3s, background-color 0.3s;
 }
 
 html[data-color-scheme='dark'] .resume section {
-  border-left-color: #80c0ff;
-}
-
-html[data-color-scheme='dark'] button {
-  background-color: #005fa3;
-  color: #fff;
+  border-left-color: oklch(50% 20% 320 / 60%);
 }
