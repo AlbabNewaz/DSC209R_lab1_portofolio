@@ -1,20 +1,5 @@
-.color-scheme {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  font-size: 0.8rem;
-}
-
 html {
   color-scheme: light dark;
-}
-nav {
-  --border-color: oklch(50% 10% 200 / 40%);
-  border-bottom: 2px solid var(--border-color);
-}
-
-nav a:hover {
-  background-color: color-mix(in oklch, var(--color-accent), canvas 85%);
 }
 
 body {
@@ -31,25 +16,57 @@ nav {
   justify-content: space-evenly;
   align-items: center;
   gap: 1rem;
-  background: #f2f2f2;
   padding: 1rem;
+  border-bottom: 2px solid var(--border-color, oklch(50% 10% 200 / 40%));
+  background-color: oklch(98% 2% 200);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+html[data-color-scheme='dark'] nav {
+  background-color: oklch(15% 5% 240);
 }
 
 nav a {
   text-decoration: none;
   color: black;
   font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  transition: color 0.3s, background-color 0.3s;
+}
+
+html[data-color-scheme='dark'] nav a {
+  color: #eee;
 }
 
 nav a:hover {
-  color: #0077cc;
+  background-color: color-mix(in oklch, var(--color-accent, oklch(60% 40% 300)), canvas 85%);
 }
 
+nav a.current {
+  color: #f777b0;
+  font-weight: bold;
+  background-color: oklch(80% 20% 320 / 40%);
+}
+
+html[data-color-scheme='dark'] nav a.current {
+  background-color: oklch(50% 20% 320 / 60%);
+}
+
+.color-scheme {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  font-size: 0.8rem;
+}
+
+/* Headings */
 h1 {
   font-size: 2rem;
   margin-top: 1.5rem;
 }
 
+/* Images */
 img {
   max-width: 100%;
   height: auto;
@@ -58,6 +75,7 @@ img {
   margin: 1rem 0;
 }
 
+/* Forms */
 form {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -103,6 +121,7 @@ button:hover {
   background-color: #005fa3;
 }
 
+/* Projects */
 .projects {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(15em, 1fr));
@@ -143,6 +162,7 @@ button:hover {
   line-height: 1.4;
 }
 
+/* Resume */
 .resume {
   display: grid;
   gap: 2rem;
@@ -180,17 +200,4 @@ button:hover {
 .resume time {
   font-weight: 500;
   color: #555;
-}
-
-nav a.current {
-  color: #f777b0;
-  font-weight: bold;  
-  text-decoration: underline;
-}
-
-.color-scheme {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  font-size: 0.8rem;
 }

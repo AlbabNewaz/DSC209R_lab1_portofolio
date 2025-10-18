@@ -61,7 +61,7 @@ document.body.insertAdjacentHTML(
 const select = document.querySelector('.color-scheme select');
 
 function setColorScheme(value) {
-  document.documentElement.style.setProperty('color-scheme', value);
+  document.documentElement.setAttribute('data-color-scheme', value);
   select.value = value;
   localStorage.setItem('colorScheme', value);
 }
