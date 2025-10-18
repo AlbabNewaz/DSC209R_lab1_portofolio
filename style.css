@@ -162,3 +162,9 @@ button:hover {
   font-weight: 500;
   color: #555;
 }
+
+nav a.current {
+  color: #f777b0;
+  font-weight: bold;  
+  text-decoration: underline;
+}
