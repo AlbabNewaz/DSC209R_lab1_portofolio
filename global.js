@@ -6,13 +6,12 @@ function $$(selector, context = document) {
 
 const pages = [
   { url: '', title: 'Home' },
-  { url: 'projects/', title: 'Projects' },
-  { url: 'Contact/', title: 'Contact' },
-  { url: 'Resume/', title: 'Resume' },
+  { url: 'projects/index.html', title: 'Projects' },
+  { url: 'Contact/index.html', title: 'Contact' },
+  { url: 'Resume/index.html', title: 'Resume' },
   { url: 'https://github.com/AlbabNewaz', title: 'GitHub' },
 ];
 
-// Remove existing nav to prevent duplicates
 $$('nav').forEach(nav => nav.remove());
 
 const nav = document.createElement('nav');
@@ -35,7 +34,9 @@ for (let p of pages) {
   a.href = url;
   a.textContent = title;
 
-  if (a.host === location.host && a.pathname === location.pathname) {
+  const currentPath = location.pathname.replace(/\/$/, '');
+  const linkPath = a.pathname.replace(/\/$/, '');
+  if (currentPath === linkPath) {
     a.classList.add('current');
   }
 
@@ -46,7 +47,6 @@ for (let p of pages) {
   nav.append(a);
 }
 
-// Theme selector
 document.body.insertAdjacentHTML(
   'afterbegin',
   `
@@ -71,10 +71,14 @@ function applyTheme(theme) {
   }
 }
 
-// Set initial theme based on select
-applyTheme(colorSelect.value);
+const savedTheme = localStorage.getItem('colorScheme');
+if (savedTheme) {
+  colorSelect.value = savedTheme;
+  applyTheme(savedTheme);
+}
 
-// Change theme on select change
 colorSelect.addEventListener('change', () => {
-  applyTheme(colorSelect.value);
+  const theme = colorSelect.value;
+  applyTheme(theme);
+  localStorage.setItem('colorScheme', theme);
 });

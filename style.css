@@ -1,14 +1,19 @@
 html {
   color-scheme: light dark;
-}
-
-body {
   font: 100%/1.5 system-ui;
   margin: 0;
   padding: 0;
   max-width: 60rem;
   margin-inline: auto;
   padding-inline: 1rem;
+  background-color: oklch(98% 2% 200); /* light mode background */
+  color: black; /* light mode text */
+  transition: background-color 0.3s, color 0.3s;
+}
+
+body {
+  margin: 0;
+  padding: 0;
 }
 
 nav {
@@ -22,39 +27,24 @@ nav {
   transition: background-color 0.3s, color 0.3s;
 }
 
-html[data-color-scheme='dark'] nav {
-  background-color: oklch(15% 5% 240);
-}
-
 nav a {
   text-decoration: none;
   color: black;
   font-weight: 500;
-  padding: 0.5rem 1rem;
+  padding: 0.25rem 0.5rem;
   border-radius: 0.25rem;
-  display: inline-block;
-  transition: background-color 0.3s, color 0.3s;
-}
-
-html[data-color-scheme='dark'] nav a {
-  color: #eee;
+  transition: color 0.3s, background-color 0.3s;
 }
 
 nav a:hover {
-  background-color: oklch(90% 40% 320 / 70%);
-  color: oklch(20% 0% 0%);
+  background-color: oklch(90% 40% 320 / 50%);
+  color: black;
 }
 
 nav a.current {
-  color: #fff;
+  color: #f777b0;
   font-weight: bold;
-  background-color: oklch(75% 30% 320 / 60%);
-  padding: 0.5rem 1rem;
-  border-radius: 0.25rem;
-}
-
-html[data-color-scheme='dark'] nav a.current {
-  background-color: oklch(40% 25% 320 / 80%);
+  background-color: oklch(80% 20% 320 / 40%);
 }
 
 .color-scheme {
@@ -64,13 +54,11 @@ html[data-color-scheme='dark'] nav a.current {
   font-size: 0.8rem;
 }
 
-/* Headings */
 h1 {
   font-size: 2rem;
   margin-top: 1.5rem;
 }
 
-/* Images */
 img {
   max-width: 100%;
   height: auto;
@@ -79,7 +67,6 @@ img {
   margin: 1rem 0;
 }
 
-/* Forms */
 form {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -125,7 +112,6 @@ button:hover {
   background-color: #005fa3;
 }
 
-/* Projects */
 .projects {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(15em, 1fr));
@@ -141,7 +127,7 @@ button:hover {
   border-radius: 0.5rem;
   padding: 1rem;
   background-color: #fafafa;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.2s, box-shadow 0.2s, background-color 0.3s, border-color 0.3s;
 }
 
 .project:hover {
@@ -166,7 +152,6 @@ button:hover {
   line-height: 1.4;
 }
 
-/* Resume */
 .resume {
   display: grid;
   gap: 2rem;
@@ -204,4 +189,42 @@ button:hover {
 .resume time {
   font-weight: 500;
   color: #555;
+}
+
+/* Dark mode styling */
+html[data-color-scheme='dark'] {
+  background-color: oklch(15% 5% 240);
+  color: #eee;
+}
+
+html[data-color-scheme='dark'] nav {
+  background-color: oklch(15% 5% 240);
+}
+
+html[data-color-scheme='dark'] nav a {
+  color: #eee;
+}
+
+html[data-color-scheme='dark'] nav a:hover {
+  background-color: oklch(30% 40% 320 / 60%);
+  color: #eee;
+}
+
+html[data-color-scheme='dark'] nav a.current {
+  background-color: oklch(50% 20% 320 / 60%);
+  color: #fff;
+}
+
+html[data-color-scheme='dark'] .project {
+  background-color: oklch(20% 5% 240 / 30%);
+  border-color: oklch(50% 10% 200 / 30%);
+}
+
+html[data-color-scheme='dark'] .resume section {
+  border-left-color: #80c0ff;
+}
+
+html[data-color-scheme='dark'] button {
+  background-color: #005fa3;
+  color: #fff;
 }
