@@ -45,7 +45,6 @@ for (let p of pages) {
   nav.append(a);
 }
 
-// Theme selector
 document.body.insertAdjacentHTML(
   'afterbegin',
   `
@@ -68,14 +67,12 @@ function applyTheme(theme) {
   } else {
     document.documentElement.removeAttribute('data-color-scheme');
   }
+  localStorage.setItem('theme', theme);
 }
 
-const savedTheme = localStorage.getItem('theme') || 'light dark';
-colorSelect.value = savedTheme;
-applyTheme(savedTheme);
+colorSelect.value = localStorage.getItem('theme') || 'light dark';
+applyTheme(colorSelect.value);
 
 colorSelect.addEventListener('change', () => {
-  const selectedTheme = colorSelect.value;
-  applyTheme(selectedTheme);
-  localStorage.setItem('theme', selectedTheme);
+  applyTheme(colorSelect.value);
 });
