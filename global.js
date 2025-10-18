@@ -12,13 +12,16 @@ const pages = [
   { url: 'https://github.com/AlbabNewaz', title: 'GitHub' },
 ];
 
+// Remove existing nav to prevent duplicates
+$$('nav').forEach(nav => nav.remove());
+
+const nav = document.createElement('nav');
+document.body.prepend(nav);
+
 const BASE_PATH =
   location.hostname === 'localhost' || location.hostname === '127.0.0.1'
     ? '/'
     : '/DSC209R_lab1_portofolio/';
-
-const nav = document.createElement('nav');
-document.body.prepend(nav);
 
 for (let p of pages) {
   let url = p.url;
@@ -32,10 +35,9 @@ for (let p of pages) {
   a.href = url;
   a.textContent = title;
 
-  a.classList.toggle(
-    'current',
-    a.host === location.host && a.pathname === location.pathname
-  );
+  if (a.host === location.host && a.pathname === location.pathname) {
+    a.classList.add('current');
+  }
 
   if (a.host !== location.host) {
     a.target = '_blank';
@@ -44,6 +46,7 @@ for (let p of pages) {
   nav.append(a);
 }
 
+// Theme selector
 document.body.insertAdjacentHTML(
   'afterbegin',
   `
@@ -58,18 +61,20 @@ document.body.insertAdjacentHTML(
 `
 );
 
-const select = document.querySelector('.color-scheme select');
+const colorSelect = document.querySelector('.color-scheme select');
 
-function setColorScheme(value) {
-  document.documentElement.setAttribute('data-color-scheme', value);
-  select.value = value;
-  localStorage.setItem('colorScheme', value);
+function applyTheme(theme) {
+  if (theme === 'light' || theme === 'dark') {
+    document.documentElement.setAttribute('data-color-scheme', theme);
+  } else {
+    document.documentElement.removeAttribute('data-color-scheme');
+  }
 }
 
-if ('colorScheme' in localStorage) {
-  setColorScheme(localStorage.colorScheme);
-}
+// Set initial theme based on select
+applyTheme(colorSelect.value);
 
-select.addEventListener('input', (event) => {
-  setColorScheme(event.target.value);
+// Change theme on select change
+colorSelect.addEventListener('change', () => {
+  applyTheme(colorSelect.value);
 });

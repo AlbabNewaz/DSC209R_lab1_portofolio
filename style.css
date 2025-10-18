@@ -30,9 +30,10 @@ nav a {
   text-decoration: none;
   color: black;
   font-weight: 500;
-  padding: 0.25rem 0.5rem;
+  padding: 0.5rem 1rem;
   border-radius: 0.25rem;
-  transition: color 0.3s, background-color 0.3s;
+  display: inline-block;
+  transition: background-color 0.3s, color 0.3s;
 }
 
 html[data-color-scheme='dark'] nav a {
@@ -40,17 +41,20 @@ html[data-color-scheme='dark'] nav a {
 }
 
 nav a:hover {
-  background-color: color-mix(in oklch, var(--color-accent, oklch(60% 40% 300)), canvas 85%);
+  background-color: oklch(90% 40% 320 / 70%);
+  color: oklch(20% 0% 0%);
 }
 
 nav a.current {
-  color: #f777b0;
+  color: #fff;
   font-weight: bold;
-  background-color: oklch(80% 20% 320 / 40%);
+  background-color: oklch(75% 30% 320 / 60%);
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
 }
 
 html[data-color-scheme='dark'] nav a.current {
-  background-color: oklch(50% 20% 320 / 60%);
+  background-color: oklch(40% 25% 320 / 80%);
 }
 
 .color-scheme {
