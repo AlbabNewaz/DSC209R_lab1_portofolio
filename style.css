@@ -199,3 +199,19 @@ html[data-color-scheme='dark'] .project {
 html[data-color-scheme='dark'] .resume section {
   border-left-color: oklch(50% 20% 320 / 60%);
 }
+
+#profile-stats dl {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  text-align: center;
+  margin-top: 1em;
+}
+
+#profile-stats dt {
+  font-weight: bold;
+}
+
+#profile-stats dd {
+  margin: 0;
+}
