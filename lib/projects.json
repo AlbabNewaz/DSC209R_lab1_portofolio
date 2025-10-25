@@ -1,0 +1,17 @@
+[
+    {
+        "title": "Potato Predictor",
+        "image": "../images/potato.jpg",
+        "description": "A data science project exploring global potato yield using regression models."
+    },
+    {
+        "title": "Spud Sentiment Analyzer",
+        "image": "../images/potato.jpg",
+        "description": "Natural language processing project to analyze potato reviews from around the world."
+    },
+    {
+        "title": "Tater Tracker App",
+        "image": "../images/potato.jpg",
+        "description": "A mock-up app to track and compare potato prices across regions."
+    }
+]
