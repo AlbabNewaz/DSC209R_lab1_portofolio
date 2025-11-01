@@ -24,30 +24,34 @@ function renderPieChart(filteredProjects) {
   const svg = d3.select('#projects-pie-plot');
   svg.selectAll('*').remove();
 
-  const width = 300;
-  const height = 300;
-  const radius = Math.min(width, height) / 2 - 10;
+  const width = 250;
+  const height = 250;
+  const radius = Math.min(width, height) / 2;
 
-  svg.attr('viewBox', `0 0 ${width} ${height}`);
+  svg.attr('viewBox', `0 0 ${width} ${height}`)
+     .style('width', '250px')
+     .style('height', '250px');
 
   const g = svg.append('g').attr('transform', `translate(${width/2}, ${height/2})`);
 
   const rolledData = d3.rollups(filteredProjects, v => v.length, d => d.year);
+  if (!rolledData.length) return;
   const data = rolledData.map(([year, count]) => ({ year, count }));
+
   const pie = d3.pie().value(d => d.count);
   const arc = d3.arc().innerRadius(0).outerRadius(radius);
   const color = d3.scaleOrdinal(d3.schemeCategory10);
 
   g.selectAll('path')
-    .data(pie(data))
-    .join('path')
-    .attr('d', arc)
-    .attr('fill', d => color(d.data.year))
-    .style('cursor', 'pointer')
-    .on('click', d => {
-      selectedYear = d.data.year === selectedYear ? null : d.data.year;
-      updateProjects();
-    });
+   .data(pie(data))
+   .join('path')
+   .attr('d', arc)
+   .attr('fill', d => color(d.data.year))
+   .style('cursor', 'pointer')
+   .on('click', d => {
+     selectedYear = d.data.year === selectedYear ? null : d.data.year;
+     updateProjects();
+   });
 
   const legend = d3.select('.legend');
   legend.selectAll('*').remove();
