@@ -48,3 +48,7 @@ async function renderPieChart() {
 }
 
 renderPieChart();
+
+let query = '';
+const searchInput = document.querySelector('.searchBar');
+
