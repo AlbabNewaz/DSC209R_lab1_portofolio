@@ -5,26 +5,35 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Projects - Albab Newaz</title>
   <link rel="stylesheet" href="../style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 </head>
 <body>
   <nav>
     <a href="../index.html">Home</a>
     <a href="../projects/index.html">Projects</a>
     <a href="../Contact/index.html">Contact</a>
-    <a href="../Resume/index.html">Resume</a>
+    <a href="../Resume/index.html">Resume</a>    
     <a href="https://github.com/AlbabNewaz" target="_blank">GitHub</a>
   </nav>
 
   <h1 class="projects-title">Projects</h1>
+  
+  <input
+    class="searchBar"
+    type="search"
+    aria-label="Search projects"
+    placeholder="🔍 Search projects…"
+  />
 
-  <input class="searchBar" type="search" aria-label="Search projects" placeholder="🔍 Search projects…" />
-
-  <canvas id="projectsChart" width="400" height="200"></canvas>
+  <div class="container">
+    <svg id="projects-pie-plot" viewBox="-100 -100 200 200"></svg>
+    <ul class="legend"></ul>
+  </div>
 
   <div class="projects"></div>
 
   <script src="../global.js" type="module"></script>
   <script src="projects.js" type="module"></script>
+  <script src="projects-vis.js" type="module"></script>
 </body>
 </html>
