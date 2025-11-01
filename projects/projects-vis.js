@@ -6,12 +6,15 @@ const legend = d3.select(".legend");
 const width = 300;
 const height = 300;
 const radius = Math.min(width, height) / 2;
-svg.attr("viewBox", [-width / 2, -height / 2, width, height]);
+
+svg.attr("viewBox", [0, 0, width, height]);
 
 let allProjects = await fetchJSON("../lib/projects.json");
 let filteredProjects = allProjects;
 
-const colorScale = d3.scaleOrdinal(d3.schemeTableau10);
+const colorScale = d3.scaleOrdinal()
+  .domain([...new Set(allProjects.map(p => p.year))])
+  .range(d3.schemeTableau10);
 
 function renderPie(projectsToRender) {
   svg.selectAll("*").remove();
@@ -25,11 +28,19 @@ function renderPie(projectsToRender) {
 
   const data = yearCounts.map(([year, count]) => ({ year, count }));
 
-  const pie = d3.pie().value(d => d.count);
-  const arcs = pie(data);
-  const arcGen = d3.arc().innerRadius(0).outerRadius(radius);
+  const pie = d3.pie()
+    .sort(null)
+    .value(d => d.count);
 
-  svg.selectAll("path")
+  const arcs = pie(data);
+  const arcGen = d3.arc()
+    .innerRadius(0)
+    .outerRadius(radius);
+
+  const g = svg.append("g")
+    .attr("transform", `translate(${width/2},${height/2})`);
+
+  g.selectAll("path")
     .data(arcs)
     .enter()
     .append("path")
@@ -39,8 +50,7 @@ function renderPie(projectsToRender) {
     .attr("stroke-width", 1)
     .style("cursor", "pointer")
     .on("click", (event, d) => {
-      const selectedYear = d.data.year;
-      filteredProjects = allProjects.filter(p => p.year === selectedYear);
+      filteredProjects = allProjects.filter(p => p.year === d.data.year);
       window.dispatchEvent(new CustomEvent('projectsFiltered', { detail: filteredProjects }));
     });
 
