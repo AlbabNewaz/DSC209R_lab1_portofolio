@@ -7,6 +7,12 @@ const searchInput = document.querySelector('.searchBar');
 let query = '';
 let selectedYear = null;
 
+// define global color mapping for all years
+const allYears = [...new Set(projects.map(p => p.year))].sort();
+const colors = d3.scaleOrdinal()
+  .domain(allYears)
+  .range(d3.schemeTableau10);
+
 function renderProjectsWithYear(projectsToRender) {
   projectsContainer.innerHTML = '';
   projectsToRender.forEach(p => {
@@ -42,7 +48,6 @@ async function renderPieChart(projectsToRender) {
   );
 
   const data = yearCounts.map(([year, count]) => ({ label: year, value: count }));
-  const colors = d3.scaleOrdinal(d3.schemeTableau10).domain(data.map(d => d.label));
 
   const pie = d3.pie().value(d => d.value);
   const arcs = pie(data);
