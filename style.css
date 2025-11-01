@@ -216,10 +216,12 @@ html[data-color-scheme='dark'] .resume section {
   margin: 0;
 }
 
-
 #projects-pie-plot {
+  width: 100%;
   max-width: 20em;
+  height: 20em;
   margin-block: 2em;
+  display: block;
   overflow: visible;
 }
 
@@ -231,6 +233,7 @@ html[data-color-scheme='dark'] .resume section {
   padding: 1em;
   margin-block: 2em;
   border-radius: 1em;
+  justify-items: start;
 }
 
 .legend li {
@@ -270,4 +273,3 @@ html[data-color-scheme='dark'] .resume section {
   border-radius: 0.25em;
   background-color: oklch(80% 20% 320 / 20%);
 }
-
