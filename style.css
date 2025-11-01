@@ -247,3 +247,27 @@ html[data-color-scheme='dark'] .resume section {
   border-radius: 0.25em;
   display: inline-block;
 }
+
+#projects-pie-plot path {
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+#projects-pie-plot path:hover {
+  transform: scale(1.05);
+  opacity: 0.8;
+}
+
+#projects-pie-plot path.selected {
+  stroke: black;
+  stroke-width: 2px;
+  opacity: 1;
+}
+
+.legend li.selected {
+  font-weight: bold;
+  border: 1px solid black;
+  padding: 0.25em 0.5em;
+  border-radius: 0.25em;
+  background-color: oklch(80% 20% 320 / 20%);
+}
+
