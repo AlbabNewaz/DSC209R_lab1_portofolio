@@ -8,7 +8,7 @@ const width = 900;
 const height = 500;
 svg.attr("width", width).attr("height", height);
 
-const margin = { top: 20, right: 20, bottom: 50, left: 60 };
+const margin = { top: 20, right: 20, bottom: 60, left: 80 };
 const innerW = width - margin.left - margin.right;
 const innerH = height - margin.top - margin.bottom;
 
@@ -30,7 +30,7 @@ const tooltip = d3.select("body")
 const summaryBox = d3.select("#summary");
 const selectionBox = d3.select("#selection-summary");
 
-// Load data
+// Load CSV
 const data = await d3.csv(csvPath, d => {
   const [h, m, s] = d.time.split(":").map(Number);
   return {
@@ -43,9 +43,9 @@ const data = await d3.csv(csvPath, d => {
   };
 });
 
-// Commit counts for circle radius
+// Circle radius based on commits
 const commitCount = d3.rollup(data, v => v.length, d => d.commit);
-const radius = d => Math.sqrt(commitCount.get(d.commit) || 1) * 2; // scale radius
+const radius = d => Math.sqrt(commitCount.get(d.commit) || 1) * 2;
 
 // Scales
 const x = d3.scaleTime()
@@ -61,18 +61,36 @@ const y = d3.scaleLinear()
 const color = d3.scaleOrdinal(d3.schemeTableau10);
 
 // Axes
+const xAxis = d3.axisBottom(x).tickFormat(d3.timeFormat("%b %d"));
+const yAxis = d3.axisLeft(y).tickFormat(d => {
+  const hh = Math.floor(d / 60);
+  const mm = Math.floor(d % 60);
+  return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
+});
+
 g.append("g")
   .attr("transform", `translate(0,${innerH})`)
-  .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%b %d")));
+  .call(xAxis)
+  .append("text")
+  .attr("x", innerW / 2)
+  .attr("y", 40)
+  .attr("fill", "black")
+  .attr("text-anchor", "middle")
+  .attr("font-size", "14px")
+  .text("Date");
 
 g.append("g")
-  .call(d3.axisLeft(y).tickFormat(d => {
-    const h = Math.floor(d / 60);
-    const m = Math.floor(d % 60);
-    return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
-  }));
+  .call(yAxis)
+  .append("text")
+  .attr("x", -innerH / 2)
+  .attr("y", -60)
+  .attr("transform", "rotate(-90)")
+  .attr("fill", "black")
+  .attr("text-anchor", "middle")
+  .attr("font-size", "14px")
+  .text("Time (HH:MM)");
 
-// Circles
+// Draw circles
 const circles = g.selectAll("circle")
   .data(data)
   .enter()
@@ -85,14 +103,14 @@ const circles = g.selectAll("circle")
   .on("mouseover", (e, d) => {
     tooltip
       .style("opacity", 1)
-      .html(
-        `File: ${d.file}<br>` +
-        `Language: ${d.type}<br>` +
-        `Date: ${d.date.toLocaleDateString()}<br>` +
-        `Time: ${Math.floor(d.minutes / 60)}:${Math.floor(d.minutes % 60).toString().padStart(2,"0")}<br>` +
-        `Lines: ${d.lines}<br>` +
-        `Commit: ${d.commit}`
-      )
+      .html(`
+        <strong>File:</strong> ${d.file}<br>
+        <strong>Language:</strong> ${d.type}<br>
+        <strong>Date:</strong> ${d.date.toLocaleDateString()}<br>
+        <strong>Time:</strong> ${Math.floor(d.minutes/60).toString().padStart(2,"0")}:${Math.floor(d.minutes%60).toString().padStart(2,"0")}<br>
+        <strong>Lines:</strong> ${d.lines}<br>
+        <strong>Commit:</strong> ${d.commit}
+      `)
       .style("left", e.pageX + 15 + "px")
       .style("top", e.pageY + "px");
   })
@@ -160,9 +178,9 @@ function brushed({ selection }) {
 const files = new Set(data.map(d => d.file));
 const langs = new Set(data.map(d => d.type));
 
-summaryBox.html(
-  `<h2>Summary</h2>
-   Files: ${files.size}<br>
-   Languages: ${langs.size}<br>
-   Total Commits: ${data.length}`
-);
+summaryBox.html(`
+  <h2>Summary</h2>
+  Files: ${files.size}<br>
+  Languages: ${langs.size}<br>
+  Total Commits: ${data.length}
+`);
