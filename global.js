@@ -5,13 +5,14 @@ function $$(selector, context = document) {
 }
 
 const pages = [
-  { url: '', title: 'Home' },
-  { url: 'projects/', title: 'Projects' },
-  { url: 'Contact/', title: 'Contact' },
-  { url: 'Resume/', title: 'Resume' },
-  { url: 'meta/', title: 'Meta' },
+  { url: 'index.html', title: 'Home' },
+  { url: 'projects/index.html', title: 'Projects' },
+  { url: 'Contact/index.html', title: 'Contact' },
+  { url: 'Resume/index.html', title: 'Resume' },
+  { url: 'meta/index.html', title: 'Meta' },
   { url: 'https://github.com/AlbabNewaz', title: 'GitHub' },
 ];
+
 
 $$('nav').forEach(nav => nav.remove());
 
