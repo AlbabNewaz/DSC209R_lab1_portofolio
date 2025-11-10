@@ -2,26 +2,35 @@ import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 
 const csvPath = "./loc.csv";
 
-
+// SVG setup
 const svg = d3.select("#scatterplot");
 const width = 900;
 const height = 500;
 svg.attr("width", width).attr("height", height);
 
-const margin = { top: 20, right: 20, bottom: 40, left: 50 };
+const margin = { top: 20, right: 20, bottom: 50, left: 60 };
 const innerW = width - margin.left - margin.right;
 const innerH = height - margin.top - margin.bottom;
 
 const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
 
+// Tooltip
 const tooltip = d3.select("body")
   .append("div")
   .attr("id", "tooltip")
-  .style("opacity", 0);
+  .style("opacity", 0)
+  .style("position", "absolute")
+  .style("background-color", "#fff")
+  .style("padding", "8px")
+  .style("border", "1px solid #ccc")
+  .style("border-radius", "4px")
+  .style("pointer-events", "none");
 
+// Summary boxes
 const summaryBox = d3.select("#summary");
 const selectionBox = d3.select("#selection-summary");
 
+// Load data
 const data = await d3.csv(csvPath, d => {
   const [h, m, s] = d.time.split(":").map(Number);
   return {
@@ -34,26 +43,27 @@ const data = await d3.csv(csvPath, d => {
   };
 });
 
-
+// Commit counts for circle radius
 const commitCount = d3.rollup(data, v => v.length, d => d.commit);
+const radius = d => Math.sqrt(commitCount.get(d.commit) || 1) * 2; // scale radius
 
-const radius = d => Math.sqrt(commitCount.get(d.commit) || 1);
-
-const x = d3.scaleLinear()
-  .domain(d3.extent(data, d => d.depth))
-  .nice()
-  .range([0, innerW]);
+// Scales
+const x = d3.scaleTime()
+  .domain(d3.extent(data, d => d.date))
+  .range([0, innerW])
+  .nice();
 
 const y = d3.scaleLinear()
-  .domain(d3.extent(data, d => d.length))
-  .nice()
-  .range([innerH, 0]);
+  .domain(d3.extent(data, d => d.minutes))
+  .range([innerH, 0])
+  .nice();
 
 const color = d3.scaleOrdinal(d3.schemeTableau10);
 
+// Axes
 g.append("g")
   .attr("transform", `translate(0,${innerH})`)
-  .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%a %d")));
+  .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%b %d")));
 
 g.append("g")
   .call(d3.axisLeft(y).tickFormat(d => {
@@ -62,13 +72,13 @@ g.append("g")
     return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
   }));
 
-
+// Circles
 const circles = g.selectAll("circle")
   .data(data)
   .enter()
   .append("circle")
-  .attr("cx", d => x(d.depth))
-  .attr("cy", d => y(d.length))
+  .attr("cx", d => x(d.date))
+  .attr("cy", d => y(d.minutes))
   .attr("r", d => radius(d))
   .attr("fill", d => color(d.type))
   .attr("opacity", 0.8)
@@ -78,8 +88,9 @@ const circles = g.selectAll("circle")
       .html(
         `File: ${d.file}<br>` +
         `Language: ${d.type}<br>` +
-        `Depth: ${d.depth}<br>` +
-        `Length: ${d.length}<br>` +
+        `Date: ${d.date.toLocaleDateString()}<br>` +
+        `Time: ${Math.floor(d.minutes / 60)}:${Math.floor(d.minutes % 60).toString().padStart(2,"0")}<br>` +
+        `Lines: ${d.lines}<br>` +
         `Commit: ${d.commit}`
       )
       .style("left", e.pageX + 15 + "px")
@@ -87,6 +98,7 @@ const circles = g.selectAll("circle")
   })
   .on("mouseout", () => tooltip.style("opacity", 0));
 
+// Brush
 const brush = d3.brush()
   .extent([[0, 0], [innerW, innerH]])
   .on("brush end", brushed);
@@ -144,6 +156,7 @@ function brushed({ selection }) {
   selectionBox.html(html);
 }
 
+// Summary
 const files = new Set(data.map(d => d.file));
 const langs = new Set(data.map(d => d.type));
 
@@ -151,5 +164,5 @@ summaryBox.html(
   `<h2>Summary</h2>
    Files: ${files.size}<br>
    Languages: ${langs.size}<br>
-   Lines: ${data.length}`
+   Total Commits: ${data.length}`
 );
