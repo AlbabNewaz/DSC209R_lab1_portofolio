@@ -22,13 +22,18 @@ const tooltip = d3.select("body")
 const summaryBox = d3.select("#summary");
 const selectionBox = d3.select("#selection-summary");
 
-const data = await d3.csv(csvPath, d => ({
-  file: d.file,
-  type: d.type,
-  commit: d.commit,
-  depth: +d.depth,
-  length: +d.length
-}));
+const data = await d3.csv(csvPath, d => {
+  const [h, m, s] = d.time.split(":").map(Number);
+  return {
+    file: d.file,
+    type: d.type,
+    commit: d.commit,
+    date: new Date(d.date),
+    minutes: h * 60 + m + s / 60,
+    lines: +d.length
+  };
+});
+
 
 const commitCount = d3.rollup(data, v => v.length, d => d.commit);
 
@@ -48,9 +53,15 @@ const color = d3.scaleOrdinal(d3.schemeTableau10);
 
 g.append("g")
   .attr("transform", `translate(0,${innerH})`)
-  .call(d3.axisBottom(x));
+  .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%a %d")));
 
-g.append("g").call(d3.axisLeft(y));
+g.append("g")
+  .call(d3.axisLeft(y).tickFormat(d => {
+    const h = Math.floor(d / 60);
+    const m = Math.floor(d % 60);
+    return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+  }));
+
 
 const circles = g.selectAll("circle")
   .data(data)
@@ -88,38 +99,49 @@ function brushed({ selection }) {
     selectionBox.html("");
     return;
   }
+
   const [[x0, y0], [x1, y1]] = selection;
 
   const selected = data.filter(d => {
-    const cx = x(d.depth);
-    const cy = y(d.length);
+    const cx = x(d.date);
+    const cy = y(d.minutes);
     return x0 <= cx && cx <= x1 && y0 <= cy && cy <= y1;
   });
 
   circles.attr("opacity", d => {
-    const cx = x(d.depth);
-    const cy = y(d.length);
+    const cx = x(d.date);
+    const cy = y(d.minutes);
     return x0 <= cx && cx <= x1 && y0 <= cy && cy <= y1 ? 1 : 0.15;
   });
 
-  if (selected.length === 0) {
+  if (!selected.length) {
     selectionBox.html("");
     return;
   }
 
-  const langCount = d3.rollup(
+  const lineTotals = d3.rollup(
     selected,
-    v => v.length,
+    v => d3.sum(v, d => d.lines),
     d => d.type
   );
 
-  const list = Array.from(langCount, ([k, v]) => `${k}: ${v}`).join("<br>");
+  const overall = d3.sum(selected, d => d.lines);
 
-  selectionBox.html(
-    `<h2>Selection Summary</h2>
-    Points: ${selected.length}<br>
-    ${list}`
-  );
+  let html = `<div><strong>${selected.length} commits selected</strong></div><br><div style="display:flex;gap:40px;">`;
+
+  for (const [lang, total] of lineTotals) {
+    const pct = ((total / overall) * 100).toFixed(1);
+    html += `
+      <div>
+        <div style="font-size:22px;font-weight:bold">${lang}</div>
+        <div style="font-size:20px">${total} lines</div>
+        <div style="font-size:18px">(${pct}%)</div>
+      </div>
+    `;
+  }
+
+  html += `</div>`;
+  selectionBox.html(html);
 }
 
 const files = new Set(data.map(d => d.file));
