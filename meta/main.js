@@ -1,6 +1,7 @@
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 
-const csvPath = "loc.csv";
+const csvPath = "./loc.csv";
+
 
 const svg = d3.select("#scatterplot");
 const width = 900;
