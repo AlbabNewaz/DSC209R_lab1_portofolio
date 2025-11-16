@@ -16,5 +16,12 @@
     "year": "2022",
     "image": "../images/potato.jpg",
     "description": "Tracks potato prices across regions."
+  },
+
+  {
+    "title": "Bike Map",
+    "year":  "2025",
+    "image": "../images/bikemap.png",
+    "description": "Tracks bike paths and bluebike's bike sharing stations with traffic data"
   }
 ]
