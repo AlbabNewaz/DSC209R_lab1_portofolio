@@ -273,3 +273,54 @@ html[data-color-scheme='dark'] .resume section {
   border-radius: 0.25em;
   background-color: oklch(80% 20% 320 / 20%);
 }
+
+
+dl#files {
+  display: grid;
+  grid-template-columns: 1fr 4fr;
+  gap: 1em;
+}
+
+dl#files > div {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
+  margin-bottom: 1em;
+}
+
+dl#files dt {
+  grid-column: 1;
+  font-weight: bold;
+}
+
+dl#files dd {
+  grid-column: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  align-content: start;
+  gap: 0.15em;
+  margin-left: 0;
+}
+
+.line-dot {
+  width: 0.5em;
+  height: 0.5em;
+  background-color: steelblue; /* fallback */
+  border-radius: 50%;
+  background-color: var(--color);
+  opacity: 0.7;
+}
+
+#scatterplot circle {
+  transition: all 200ms, r calc(var(--r) * 100ms);
+  transform-origin: center;
+  transform-box: fill-box;
+}
+
+@starting-style {
+  #scatterplot circle {
+    r: 0;
+    fill-opacity: 0;
+  }
+}

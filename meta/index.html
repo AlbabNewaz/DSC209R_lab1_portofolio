@@ -17,6 +17,18 @@
   <a href="https://github.com/AlbabNewaz" target="_blank">GitHub</a>
 </nav>
 
+<label style="display: flex; align-items: baseline; margin-bottom: 1rem;">
+  Show commits until:
+  <input type="range" id="commit-slider" min="0" max="100" value="100" style="flex: 1; margin: 0 1rem;">
+  <time id="selected-time" style="font-variant-numeric: tabular-nums;"></time>
+</label>
+
+<div id="chart-container">
+  <svg id="scatterplot"></svg>
+</div>
+
+<p id="selection-count">No commits selected</p>
+<dl id="files"></dl>
 
 <h1>Repository Meta Visualization</h1>
 
