@@ -275,59 +275,52 @@ html[data-color-scheme='dark'] .resume section {
 }
 
 
-/* ---------- Lab 8 additions ---------- */
 
-#controls input[type="range"] {
-  -webkit-appearance: none;
-  height: 6px;
-  background: linear-gradient(90deg, #0077cc, #a5d8ff);
-  border-radius: 999px;
-  outline: none;
-}
-#controls input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: white;
-  box-shadow: 0 0 0 3px rgba(0,0,0,0.08);
-  cursor: pointer;
-}
 
-#scatter-story .step {
-  padding: 1.25rem 0;
-  border-left: 3px solid transparent;
-}
-#scatter-story .step.is-active {
-  border-color: #0077cc;
-  background: rgba(0, 119, 204, 0.04);
+
+
+
+
+
+
+
+
+
+
+
+
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
 }
 
-#files {
-  display: grid;
-  gap: 0.5rem;
-  grid-template-columns: 1fr;
-}
-#files > div {
-  display: grid;
-  grid-template-columns: 200px 1fr;
-  align-items: start;
-  gap: 0.5rem;
-  border-bottom: 1px dashed rgba(0,0,0,0.06);
-  padding: 0.4rem 0;
-}
-#files dt { font-weight: 600; }
-#files dd {
-  display:flex;
-  flex-wrap:wrap;
-  gap: 0.08em;
-  padding-top: 0.2em;
-  margin:0;
+#chart-container {
+  width: 900px;
+  height: 500px;
+  margin-top: 20px;
 }
 
-.loc { width:0.5em; aspect-ratio:1; border-radius:50%; display:inline-block; }
+svg {
+  width: 100%;
+  height: 100%;
+}
 
-.legend { display:flex; gap:0.5rem; align-items:center; }
-.legend .swatch { width:1em; height:1em; border-radius:0.2rem; display:inline-block; }
+#summary {
+  margin-bottom: 20px;
+  font-size: 1.1rem;
+}
 
-#tooltip { z-index: 9999; box-shadow: 0 6px 18px rgba(0,0,0,.12); }
+#type-select {
+  margin-bottom: 20px;
+}
+
+.point {
+  stroke: black;
+  stroke-width: 1px;
+}
+
+#selection-summary {
+  margin-top: 20px;
+  font-size: 1.1rem;
+}
