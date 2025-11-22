@@ -1,45 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Meta Visualization</title>
-<link rel="stylesheet" href="../style.css">
-<script src="https://d3js.org/d3.v7.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meta Visualization</title>
+  <link rel="stylesheet" href="../style.css">
+  <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 <body>
-<nav>
-  <a href="../index.html">Home</a>
-  <a href="../projects/index.html">Projects</a>
-  <a href="../Contact/index.html">Contact</a>
-  <a href="../Resume/index.html">Resume</a>
-  <a href="index.html" class="current">Meta</a>
-  <a href="https://github.com/AlbabNewaz" target="_blank">GitHub</a>
-</nav>
+  <nav>
+    <a href="../index.html">Home</a>
+    <a href="../projects/index.html">Projects</a>
+    <a href="../contact/index.html">Contact</a>
+    <a href="../resume/index.html">Resume</a>
+    <a href="index.html" class="current">Meta</a>
+    <a href="https://github.com/AlbabNewaz" target="_blank">GitHub</a>
+  </nav>
 
-<label style="display: flex; align-items: baseline; margin-bottom: 1rem;">
-  Show commits until:
-  <input type="range" id="commit-slider" min="0" max="100" value="100" style="flex: 1; margin: 0 1rem;">
-  <time id="selected-time" style="font-variant-numeric: tabular-nums;"></time>
-</label>
+  <h1>Repository Meta Visualization</h1>
 
-<div id="chart-container">
-  <svg id="scatterplot"></svg>
-</div>
+  <section id="summary"></section>
 
-<p id="selection-count">No commits selected</p>
-<dl id="files"></dl>
+  <div id="scrolly-1">
 
-<h1>Repository Meta Visualization</h1>
+    <div id="scatter-story"></div>
 
-<section id="summary"></section>
+    <div id="scatter-plot-container">
+      
+      <div id="chart-container">
+        <svg id="scatterplot"></svg>
+      </div>
 
-<div id="chart-container">
-  <svg id="scatterplot"></svg>
-</div>
+      <p id="selection-count">No commits selected</p>
+      
+      <dl id="files"></dl>
+    </div>
 
-<div id="selection-summary"></div>
+  </div>
 
-<script type="module" src="main.js"></script>
+  <script type="module" src="main.js"></script>
 </body>
 </html>
