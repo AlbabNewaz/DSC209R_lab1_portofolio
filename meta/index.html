@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Meta Visualization</title>
-  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="../style.css" />
   <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 <body>
   <nav>
     <a href="../index.html">Home</a>
     <a href="../projects/index.html">Projects</a>
-    <a href="../contact/index.html">Contact</a>
-    <a href="../resume/index.html">Resume</a>
+    <a href="../Contact/index.html">Contact</a>
+    <a href="../Resume/index.html">Resume</a>
     <a href="index.html" class="current">Meta</a>
     <a href="https://github.com/AlbabNewaz" target="_blank">GitHub</a>
   </nav>
@@ -21,22 +21,46 @@
 
   <section id="summary"></section>
 
-  <div id="scrolly-1">
+  <!-- Controls -->
+  <div id="controls" style="display:flex;gap:1rem;align-items:center;margin:1rem 0;">
+    <label style="flex:1; display:flex; align-items:center; gap:1rem;">
+      <span>Show commits until:</span>
+      <input id="commit-progress" type="range" min="0" max="100" value="100" style="flex:1" />
+      <time id="commit-time" style="min-width:220px; text-align:right;"></time>
+    </label>
 
-    <div id="scatter-story"></div>
+    <label style="display:flex;align-items:center;gap:0.5rem;">
+      <span style="font-weight:500">Highlight:</span>
+      <select id="type-select">
+        <option value="all">All types</option>
+      </select>
+    </label>
+  </div>
 
-    <div id="scatter-plot-container">
-      
-      <div id="chart-container">
-        <svg id="scatterplot"></svg>
+  <div id="scrolly-1" style="display:flex;gap:1rem;align-items:flex-start;">
+    <div id="scatter-story" style="flex:1; max-width:38ch; padding-top:1rem;">
+      <!-- story steps generated from commits -->
+      <div class="instructions">
+        Scroll down the commit descriptions to watch the repo evolve.
       </div>
-
-      <p id="selection-count">No commits selected</p>
-      
-      <dl id="files"></dl>
     </div>
 
+    <div id="scatter-plot" style="flex:2; position:sticky; top:1rem; height:60vh;">
+      <div id="chart-container" style="width:100%;height:100%;">
+        <svg id="scatterplot" style="width:100%;height:100%;"></svg>
+      </div>
+
+      <div style="margin-top:0.5rem; display:flex; gap:1rem; align-items:center;">
+        <div id="legend" class="legend" style="display:flex; gap:0.5rem; align-items:center;"></div>
+        <div id="selection-summary" style="margin-left:auto;"></div>
+      </div>
+    </div>
   </div>
+
+  <section style="margin-top:2rem;">
+    <h2>Files (unit visualization)</h2>
+    <dl id="files"></dl>
+  </section>
 
   <script type="module" src="main.js"></script>
 </body>

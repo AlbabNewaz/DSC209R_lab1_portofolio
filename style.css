@@ -275,52 +275,59 @@ html[data-color-scheme='dark'] .resume section {
 }
 
 
-dl#files {
-  display: grid;
-  grid-template-columns: 1fr 4fr;
-  gap: 1em;
-}
+/* ---------- Lab 8 additions ---------- */
 
-dl#files > div {
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: subgrid;
-  margin-bottom: 1em;
+#controls input[type="range"] {
+  -webkit-appearance: none;
+  height: 6px;
+  background: linear-gradient(90deg, #0077cc, #a5d8ff);
+  border-radius: 999px;
+  outline: none;
 }
-
-dl#files dt {
-  grid-column: 1;
-  font-weight: bold;
-}
-
-dl#files dd {
-  grid-column: 2;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: start;
-  align-content: start;
-  gap: 0.15em;
-  margin-left: 0;
-}
-
-.line-dot {
-  width: 0.5em;
-  height: 0.5em;
-  background-color: steelblue; /* fallback */
+#controls input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
-  background-color: var(--color);
-  opacity: 0.7;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.08);
+  cursor: pointer;
 }
 
-#scatterplot circle {
-  transition: all 200ms, r calc(var(--r) * 100ms);
-  transform-origin: center;
-  transform-box: fill-box;
+#scatter-story .step {
+  padding: 1.25rem 0;
+  border-left: 3px solid transparent;
+}
+#scatter-story .step.is-active {
+  border-color: #0077cc;
+  background: rgba(0, 119, 204, 0.04);
 }
 
-@starting-style {
-  #scatterplot circle {
-    r: 0;
-    fill-opacity: 0;
-  }
+#files {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: 1fr;
 }
+#files > div {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  align-items: start;
+  gap: 0.5rem;
+  border-bottom: 1px dashed rgba(0,0,0,0.06);
+  padding: 0.4rem 0;
+}
+#files dt { font-weight: 600; }
+#files dd {
+  display:flex;
+  flex-wrap:wrap;
+  gap: 0.08em;
+  padding-top: 0.2em;
+  margin:0;
+}
+
+.loc { width:0.5em; aspect-ratio:1; border-radius:50%; display:inline-block; }
+
+.legend { display:flex; gap:0.5rem; align-items:center; }
+.legend .swatch { width:1em; height:1em; border-radius:0.2rem; display:inline-block; }
+
+#tooltip { z-index: 9999; box-shadow: 0 6px 18px rgba(0,0,0,.12); }
