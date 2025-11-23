@@ -274,3 +274,19 @@ html[data-color-scheme='dark'] .resume section {
   background-color: oklch(80% 20% 320 / 20%);
 }
 
+
+#time-filter {
+  display: flex;
+  align-items: center;
+  gap: 1em;
+  width: 90%;
+  max-width: 1200px;
+  margin: 1em auto;
+}
+
+#commit-time {
+  margin-left: auto;
+  color: black !important;
+  font-weight: bold;
+}
+
