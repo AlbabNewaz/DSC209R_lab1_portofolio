@@ -2,9 +2,9 @@ import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 
 const csvPath = "./loc.csv";
 
-let commitProgress = 100;
-
-// SVG setup
+// -----------------------------
+// SVG SETUP
+// -----------------------------
 const svg = d3.select("#scatterplot");
 const width = 900;
 const height = 500;
@@ -32,7 +32,9 @@ const tooltip = d3.select("body")
 const summaryBox = d3.select("#summary");
 const selectionBox = d3.select("#selection-summary");
 
-// ------------ LOAD CSV -------------
+// -----------------------------
+// LOAD CSV
+// -----------------------------
 const data = await d3.csv(csvPath, d => {
   const [h, m, s] = d.time.split(":").map(Number);
   return {
@@ -45,19 +47,41 @@ const data = await d3.csv(csvPath, d => {
   };
 });
 
-// ------------ SLIDER SCALE -------------
-const sliderScale = d3.scaleLinear()
-  .domain([0, 100])
-  .range(d3.extent(data, d => d.date));
+// -----------------------------
+// SLIDER SETUP
+// -----------------------------
+const commitTimeScale = d3.scaleTime()
+  .domain(d3.extent(data, d => d.date))
+  .range([0, 100]);
 
-const commitTimeEl = document.getElementById("commit-time");
-commitTimeEl.textContent = sliderScale(commitProgress).toLocaleString();
+let commitProgress = 100;
+let commitMaxTime = commitTimeScale.invert(commitProgress);
 
-// ------------ CIRCLE RADIUS -------------
+const slider = document.getElementById("commit-progress");
+const timeDisplay = document.getElementById("commit-time");
+
+function updateTimeDisplay() {
+  commitProgress = +slider.value;
+  commitMaxTime = commitTimeScale.invert(commitProgress);
+
+  timeDisplay.textContent = commitMaxTime.toLocaleString("en-US", {
+    dateStyle: "long",
+    timeStyle: "short"
+  });
+}
+
+// Initialize display
+updateTimeDisplay();
+
+// Update on slider move
+slider.addEventListener("input", updateTimeDisplay);
+
+// -----------------------------
+// SCALES & AXES
+// -----------------------------
 const commitCount = d3.rollup(data, v => v.length, d => d.commit);
 const radius = d => Math.sqrt(commitCount.get(d.commit) || 1) * 2;
 
-// ------------ SCALES -------------
 const x = d3.scaleTime()
   .domain(d3.extent(data, d => d.date))
   .range([0, innerW])
@@ -70,7 +94,7 @@ const y = d3.scaleLinear()
 
 const color = d3.scaleOrdinal(d3.schemeTableau10);
 
-// ------------ AXES -------------
+// Axes
 const xAxis = d3.axisBottom(x).tickFormat(d3.timeFormat("%b %d"));
 const yAxis = d3.axisLeft(y).tickFormat(d => {
   const hh = Math.floor(d / 60);
@@ -100,7 +124,9 @@ g.append("g")
   .attr("font-size", "14px")
   .text("Time (HH:MM)");
 
-// ------------ DRAW CIRCLES -------------
+// -----------------------------
+// DRAW CIRCLES
+// -----------------------------
 const circles = g.selectAll("circle")
   .data(data)
   .enter()
@@ -126,7 +152,9 @@ const circles = g.selectAll("circle")
   })
   .on("mouseout", () => tooltip.style("opacity", 0));
 
-// ------------ BRUSH -------------
+// -----------------------------
+// BRUSH
+// -----------------------------
 const brush = d3.brush()
   .extent([[0, 0], [innerW, innerH]])
   .on("brush end", brushed);
@@ -184,7 +212,9 @@ function brushed({ selection }) {
   selectionBox.html(html);
 }
 
-// ------------ SUMMARY -------------
+// -----------------------------
+// SUMMARY
+// -----------------------------
 const files = new Set(data.map(d => d.file));
 const langs = new Set(data.map(d => d.type));
 
@@ -194,10 +224,3 @@ summaryBox.html(`
   Languages: ${langs.size}<br>
   Total Commits: ${data.length}
 `);
-
-// ------------ SLIDER LISTENER -------------
-document.getElementById("commit-progress").addEventListener("input", function () {
-  commitProgress = +this.value;
-  const currentTime = sliderScale(commitProgress);
-  commitTimeEl.textContent = currentTime.toLocaleString();
-});
