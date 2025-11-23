@@ -1,51 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Meta Visualization</title>
-  <link rel="stylesheet" href="../style.css">
-  <script src="https://d3js.org/d3.v7.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meta Visualization</title>
+<link rel="stylesheet" href="../style.css">
+<script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 <body>
-  <nav>
-    <a href="../index.html">Home</a>
-    <a href="../projects/index.html">Projects</a>
-    <a href="../Contact/index.html">Contact</a>
-    <a href="../Resume/index.html">Resume</a>
-    <a href="index.html" class="current">Meta</a>
-    <a href="https://github.com/AlbabNewaz" target="_blank">GitHub</a>
-  </nav>
+<nav>
+  <a href="../index.html">Home</a>
+  <a href="../projects/index.html">Projects</a>
+  <a href="../Contact/index.html">Contact</a>
+  <a href="../Resume/index.html">Resume</a>
+  <a href="index.html" class="current">Meta</a>
+  <a href="https://github.com/AlbabNewaz" target="_blank">GitHub</a>
+</nav>
 
-  <h1>Repository Meta Visualization</h1>
+<h1>Repository Meta Visualization</h1>
 
-  <!-- Slider for filtering commits -->
-  <div id="time-filter">
-    <label for="commit-progress">Show commits until:</label>
-    <input
-      type="range"
-      id="commit-progress"
-      min="0"
-      max="100"
-      value="100"
-    />
-    <time id="commit-time"></time>
-  </div> <!-- slider div closes here -->
+<!-- Slider -->
+<div id="time-filter">
+  <label for="commit-progress">Show commits until:</label>
+  <input type="range" id="commit-progress" min="0" max="100" value="100" />
+  <time id="commit-time"></time>
+</div>
 
-  <!-- File list visualization -->
-  <dl id="files"></dl>
+<!-- File/unit visualization -->
+<dl id="files"></dl>
 
-  <!-- Commit summary section -->
-  <section id="summary"></section>
+<!-- Summary and scatterplot -->
+<section id="summary"></section>
 
-  <!-- Scatterplot -->
-  <div id="chart-container">
-    <svg id="scatterplot"></svg>
-  </div>
+<div id="chart-container">
+  <svg id="scatterplot"></svg>
+</div>
 
-  <!-- Additional selection summary -->
-  <div id="selection-summary"></div>
+<div id="selection-summary"></div>
 
-  <script type="module" src="main.js"></script>
+<script type="module" src="main.js"></script>
 </body>
 </html>
