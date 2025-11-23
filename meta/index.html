@@ -17,26 +17,26 @@
   <a href="https://github.com/AlbabNewaz" target="_blank">GitHub</a>
 </nav>
 
-<h1>Repository Meta Visualization 1.2</h1>
+<h1>Repository Meta Visualization</h1>
 
-<!-- Slider -->
-<div id="time-filter">
-  <label for="commit-progress">Show commits until:</label>
-  <input type="range" id="commit-progress" min="0" max="100" value="100" />
-  <time id="commit-time"></time>
-</div>
-
-<!-- File/unit visualization -->
-<dl id="files"></dl>
-
-<!-- Summary and scatterplot -->
 <section id="summary"></section>
+<div id="selection-summary"></div>
 
-<div id="chart-container">
-  <svg id="scatterplot"></svg>
+<!-- SCROLLAMA CONTAINER -->
+<div id="scrolly-1">
+  <!-- Left column: explanatory text -->
+  <div id="scatter-story">
+    <p>Scroll down to see how the repository evolved over time!</p>
+  </div>
+
+  <!-- Right column: scatter plot -->
+  <div id="scatter-plot">
+    <svg id="scatterplot"></svg>
+  </div>
 </div>
 
-<div id="selection-summary"></div>
+<!-- Unit visualization of files (moved below scatter plot) -->
+<dl id="files"></dl>
 
 <script type="module" src="main.js"></script>
 </body>
