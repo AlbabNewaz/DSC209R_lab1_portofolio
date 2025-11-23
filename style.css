@@ -328,7 +328,17 @@ html[data-color-scheme='dark'] .resume section {
   overflow-y: auto;
   padding-right: 1rem;
 }
+#file-viz-wrapper {
+  flex: 1;
+  position: sticky;
+  top: 80px;   /* match nav height */
+  height: 60vh;
+  overflow-y: auto;
+}
 
+#files {
+  width: 100%;
+}
 /* ---------------- FILES LAYOUT ---------------- */
 
 #files {
