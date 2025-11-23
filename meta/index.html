@@ -81,16 +81,22 @@
 </div>
 
 
-        <h2>Meta evolution</h2>
-        <div id="code-layout">
-            <div>
-                <dl id="files"></dl>
-            </div>
+<h2>Meta evolution</h2>
+<div id="code-layout">
 
-            <div id="scrolly-2">
-                <div id="file-story"></div>
-            </div>
-        </div>
+    <!-- scrolly-2 must contain BOTH columns -->
+    <div id="scrolly-2">
+
+        <!-- LEFT: text that changes on scroll -->
+        <div id="file-story"></div>
+
+        <!-- RIGHT: sticky commit timeline -->
+        <dl id="files"></dl>
+
+    </div>
+
+</div>
+
     </div>
 
     <script type="module" src="../global.js"></script>
