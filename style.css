@@ -352,28 +352,113 @@ dd {
   padding-top: 0.6em;
   margin-left: 0;
 }
-
-#files dt small {
-  display: block;
-  font-size: 0.8em;
-  opacity: 0.6;
+#files code {
+  font-size: 0.9rem;
 }
-#scrolly-1 {
-  position: relative;
-  display: flex;
-  gap: 1rem;
 
-  > * {
-    flex: 1;
+
+
+
+
+
+
+circle {
+  transform-origin: center;
+  transform-box: fill-box;
+  transition: all 200ms ease-out;
+
+  @starting-style {
+    r: 0;
   }
 }
-#scatter-story {
+
+circle:hover {
+  transform: scale(1.5);
+}
+
+circle.selected {
+  fill: #B91C1C
+}
+
+#evolution-layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(360px, 1.4fr);
+  gap: 1.5rem;
+  align-items: flex-start;
+  margin-top: 1.5rem;
+}
+
+#scrolly-1 {
   position: relative;
 }
+
+#scatter-story .step {
+  max-width: 36rem;
+  padding: 0.75rem 0 1rem;
+  border-bottom: 1px solid color-mix(in oklch, canvastext 15%, transparent);
+}
+#scatter-story .step:last-child {
+  padding-bottom: 0.5rem;
+  border-bottom: none;
+}
+
 #scatter-plot {
   position: sticky;
-  top: 0;
+  top: calc(var(--nav-h) + 1rem);
   left: 0;
   bottom: auto;
-  height: 50vh;
+  display: flex;
+  flex-direction: column;
+   gap: 0.75rem;
+  align-items: stretch;
+}
+
+#scatter-plot #chart {
+  flex: 1;
+  min-height: 0;
+}
+
+#selection-count {
+  margin: 0.5rem 0 0.25rem;
+}
+
+#language-breakdown {
+  margin-top: 0.25rem;
+}
+
+#code-layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 1.4fr) minmax(260px, 1fr);
+  gap: 1.5rem;
+  align-items: flex-start;
+  margin-top: 1.5rem;
+}
+#code-layout > div:first-child {
+  position: sticky;
+  top: calc(var(--nav-h) + 1rem);
+  align-self: start;
+  max-height: calc(100vh - var(--nav-h) - 2rem);
+  overflow-y: auto;
+}
+
+
+#scrolly-2 {
+  position: relative;
+}
+#scrolly-2 .step {
+  max-width: 36rem;
+  padding: 0.75rem 0 1rem;
+  border-bottom: 1px solid color-mix(in oklch, canvastext 15%, transparent);
+}
+#scrolly-2 .step p {
+  margin: 0.25rem 0;
+}
+
+#scatter-story .step p,
+#scrolly-2 .step p {
+  margin: 0 0 0.35rem;   
+}
+#scatter-story .step + .step,
+#scrolly-2 .step + .step {
+  margin-top: 0.75rem;   
 }
