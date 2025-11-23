@@ -1,224 +1,147 @@
-import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
+import * as d3 from "https://cdn.skypack.dev/d3";
 
-const csvPath = "./loc.csv";
+// ----------------------
+// Data Loading & Init
+// ----------------------
+let commits = []; // will hold all commits
+let filteredCommits = []; // commits filtered by slider
 
-// SVG setup
-const svg = d3.select("#scatterplot");
-const width = 900;
-const height = 500;
-svg.attr("width", width).attr("height", height);
+let xScale, yScale;
+let commitMaxTime;
 
-const margin = { top: 20, right: 20, bottom: 60, left: 80 };
-const innerW = width - margin.left - margin.right;
-const innerH = height - margin.top - margin.bottom;
+// Load CSV or JSON data
+d3.json('loc.csv').then((data) => {
+  commits = data.map((d) => ({
+    ...d,
+    datetime: new Date(d.datetime),
+    hourFrac: +d.hourFrac,
+    totalLines: +d.totalLines,
+    id: d.id,
+    lines: d.lines // array of {file, lineNumber}
+  }));
 
-const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+  // Initial scales
+  xScale = d3.scaleTime().range([50, 950]);
+  yScale = d3.scaleLinear().range([10, 590]);
 
-// Tooltip
-const tooltip = d3.select("body")
-  .append("div")
-  .attr("id", "tooltip")
-  .style("opacity", 0)
-  .style("position", "absolute")
-  .style("background-color", "#fff")
-  .style("padding", "8px")
-  .style("border", "1px solid #ccc")
-  .style("border-radius", "4px")
-  .style("pointer-events", "none");
+  commitMaxTime = d3.max(commits, (d) => d.datetime);
+  filteredCommits = commits;
 
-// Summary boxes
-const summaryBox = d3.select("#summary");
-const selectionBox = d3.select("#selection-summary");
-
-// Load CSV
-const data = await d3.csv(csvPath, d => {
-  const [h, m, s] = d.time.split(":").map(Number);
-  return {
-    id: d.commit,   // unique id for stable circles
-    file: d.file,
-    type: d.type,
-    commit: d.commit,
-    date: new Date(d.date),
-    minutes: h * 60 + m + s / 60,
-    lines: +d.length
-  };
+  renderScatterPlot(commits);
+  updateFileDisplay(filteredCommits);
+  setupSlider();
 });
 
-// Scales
-const x = d3.scaleTime()
-  .domain(d3.extent(data, d => d.date))
-  .range([0, innerW])
-  .nice();
+// ----------------------
+// Scatterplot
+// ----------------------
+function renderScatterPlot(commits) {
+  const svg = d3.select('#scatterplot')
+    .attr('width', 1000)
+    .attr('height', 600);
 
-const y = d3.scaleLinear()
-  .domain(d3.extent(data, d => d.minutes))
-  .range([innerH, 0])
-  .nice();
+  xScale.domain(d3.extent(commits, (d) => d.datetime));
+  yScale.domain([0, 24]);
 
-const color = d3.scaleOrdinal(d3.schemeTableau10);
+  const xAxis = d3.axisBottom(xScale);
+  const yAxis = d3.axisLeft(yScale);
 
-// Axes
-const xAxis = d3.axisBottom(x).tickFormat(d3.timeFormat("%b %d"));
-const yAxis = d3.axisLeft(y).tickFormat(d => {
-  const hh = Math.floor(d / 60);
-  const mm = Math.floor(d % 60);
-  return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
-});
+  svg.append('g')
+    .attr('class', 'x-axis')
+    .attr('transform', `translate(0, 590)`)
+    .call(xAxis);
 
-g.append("g")
-  .attr("class", "x-axis")
-  .attr("transform", `translate(0,${innerH})`)
-  .call(xAxis)
-  .append("text")
-  .attr("x", innerW / 2)
-  .attr("y", 40)
-  .attr("fill", "black")
-  .attr("text-anchor", "middle")
-  .attr("font-size", "14px")
-  .text("Date");
+  svg.append('g')
+    .attr('class', 'y-axis')
+    .attr('transform', `translate(50, 0)`)
+    .call(yAxis);
 
-g.append("g")
-  .attr("class", "y-axis")
-  .call(yAxis)
-  .append("text")
-  .attr("x", -innerH / 2)
-  .attr("y", -60)
-  .attr("transform", "rotate(-90)")
-  .attr("fill", "black")
-  .attr("text-anchor", "middle")
-  .attr("font-size", "14px")
-  .text("Time (HH:MM)");
+  svg.append('g').attr('class', 'dots');
 
-// Circle radius based on commit count
-const commitCount = d3.rollup(data, v => v.length, d => d.commit);
-const radius = d => Math.sqrt(commitCount.get(d.commit) || 1) * 2;
+  updateScatterPlot(commits);
+}
 
-// Draw circles container
-const dots = g.append("g").attr("class", "dots");
+function updateScatterPlot(commits) {
+  const svg = d3.select('#scatterplot');
 
-function renderCircles(commits) {
-  const sortedCommits = d3.sort(commits, d => -d.lines);
+  xScale.domain(d3.extent(commits, (d) => d.datetime));
+  const [minLines, maxLines] = d3.extent(commits, (d) => d.totalLines);
+  const rScale = d3.scaleSqrt().domain([minLines, maxLines]).range([2, 30]);
 
-  dots.selectAll("circle")
-    .data(sortedCommits, d => d.id) // stable circles
-    .join(
-      enter => enter.append("circle")
-                    .attr("r", 0) // start radius for transition
-                    .style("transition", "r 300ms")
-                    .call(enter => enter.transition().attr("r", d => radius(d))),
-      update => update,
-      exit => exit.remove()
-    )
-    .attr("cx", d => x(d.date))
-    .attr("cy", d => y(d.minutes))
-    .attr("fill", d => color(d.type))
-    .attr("opacity", 0.8)
-    .on("mouseover", (e, d) => {
-      tooltip.style("opacity", 1)
-        .html(`
-          <strong>File:</strong> ${d.file}<br>
-          <strong>Language:</strong> ${d.type}<br>
-          <strong>Date:</strong> ${d.date.toLocaleDateString()}<br>
-          <strong>Time:</strong> ${Math.floor(d.minutes/60).toString().padStart(2,"0")}:${Math.floor(d.minutes%60).toString().padStart(2,"0")}<br>
-          <strong>Lines:</strong> ${d.lines}<br>
-          <strong>Commit:</strong> ${d.commit}
-        `)
-        .style("left", e.pageX + 15 + "px")
-        .style("top", e.pageY + "px");
+  // Update x-axis
+  const xAxis = d3.axisBottom(xScale);
+  svg.select('g.x-axis').call(xAxis);
+
+  // Bind dots
+  const dots = svg.select('g.dots');
+  const sortedCommits = d3.sort(commits, (d) => -d.totalLines);
+
+  dots.selectAll('circle')
+    .data(sortedCommits, (d) => d.id)
+    .join('circle')
+    .attr('cx', (d) => xScale(d.datetime))
+    .attr('cy', (d) => yScale(d.hourFrac))
+    .attr('r', (d) => rScale(d.totalLines))
+    .attr('fill', 'steelblue')
+    .style('fill-opacity', 0.7)
+    .on('mouseenter', (event, commit) => {
+      d3.select(event.currentTarget).style('fill-opacity', 1);
     })
-    .on("mouseout", () => tooltip.style("opacity", 0));
+    .on('mouseleave', (event) => {
+      d3.select(event.currentTarget).style('fill-opacity', 0.7);
+    });
 }
 
-// Initial render
-renderCircles(data);
+// ----------------------
+// Slider Filtering
+// ----------------------
+function setupSlider() {
+  const slider = d3.select('#commit-progress');
+  const timeLabel = d3.select('#commit-time');
 
-// Function to update axes
-function updateAxes(commits) {
-  x.domain(d3.extent(commits, d => d.date));
-  y.domain(d3.extent(commits, d => d.minutes));
+  slider.on('input', (event) => {
+    const pct = +event.target.value / 100;
+    const times = d3.extent(commits, (d) => d.datetime);
+    commitMaxTime = new Date(times[0].getTime() + pct * (times[1] - times[0]));
 
-  g.select("g.x-axis").call(xAxis);
-  g.select("g.y-axis").call(yAxis);
+    filteredCommits = commits.filter((d) => d.datetime <= commitMaxTime);
+
+    updateScatterPlot(filteredCommits);
+    updateFileDisplay(filteredCommits);
+
+    const formatted = commitMaxTime.toLocaleString();
+    timeLabel.text(formatted);
+  });
+
+  // Initialize label
+  timeLabel.text(d3.max(commits, (d) => d.datetime).toLocaleString());
 }
 
-// File display
+// ----------------------
+// File Unit Visualization
+// ----------------------
 function updateFileDisplay(filteredCommits) {
-  const files = d3.groups(filteredCommits, d => d.file)
+  const lines = filteredCommits.flatMap((d) => d.lines);
+
+  const files = d3.groups(lines, (d) => d.file)
     .map(([name, lines]) => ({ name, lines }));
 
-  const filesContainer = d3.select("#files")
-    .selectAll("div")
-    .data(files, d => d.name)
+  const filesContainer = d3.select('#files')
+    .selectAll('div')
+    .data(files, (d) => d.name)
     .join(
-      enter => enter.append("div").call(div => {
-        div.append("dt").append("code");
-        div.append("dd");
+      (enter) => enter.append('div').call((div) => {
+        div.append('dt').append('code');
+        div.append('dd');
       }),
-      update => update,
-      exit => exit.remove()
     );
 
-  filesContainer.select("dt > code").text(d => d.name);
-  filesContainer.select("dd").text(d => `${d.lines.length} lines`);
+  filesContainer.select('dt > code')
+    .html((d) => `${d.name} <small>${d.lines.length} lines</small>`);
+
+  filesContainer.select('dd')
+    .selectAll('div')
+    .data((d) => d.lines)
+    .join('div')
+    .attr('class', 'loc');
 }
-
-// Selection summary
-function updateSelectionSummary(filteredCommits) {
-  const lineTotals = d3.rollup(
-    filteredCommits,
-    v => d3.sum(v, d => d.lines),
-    d => d.type
-  );
-
-  const overall = d3.sum(filteredCommits, d => d.lines);
-
-  let html = `<div><strong>${filteredCommits.length} commits selected</strong></div><br><div style="display:flex;gap:40px;">`;
-
-  for (const [lang, total] of lineTotals) {
-    const pct = ((total / overall) * 100).toFixed(1);
-    html += `
-      <div>
-        <div style="font-size:22px;font-weight:bold">${lang}</div>
-        <div style="font-size:20px">${total} lines</div>
-        <div style="font-size:18px">(${pct}%)</div>
-      </div>
-    `;
-  }
-
-  html += `</div>`;
-  selectionBox.html(html);
-}
-
-// Slider
-const slider = d3.select("#commit-progress");
-const commitTimeDisplay = d3.select("#commit-time");
-
-slider.on("input", function() {
-  const commitProgress = +this.value;
-  const minDate = d3.min(data, d => d.date);
-  const maxDate = d3.max(data, d => d.date);
-  const commitMaxTime = new Date(minDate.getTime() + (maxDate - minDate) * (commitProgress / 100));
-
-  commitTimeDisplay.text(commitMaxTime.toDateString());
-
-  const filteredCommits = data.filter(d => d.date <= commitMaxTime);
-
-  updateAxes(filteredCommits);
-  renderCircles(filteredCommits);
-  updateFileDisplay(filteredCommits);
-  updateSelectionSummary(filteredCommits);
-});
-
-// Initial file display and selection summary
-updateFileDisplay(data);
-updateSelectionSummary(data);
-
-// Summary
-const filesSet = new Set(data.map(d => d.file));
-const langsSet = new Set(data.map(d => d.type));
-summaryBox.html(`
-  <h2>Summary</h2>
-  Files: ${filesSet.size}<br>
-  Languages: ${langsSet.size}<br>
-  Total Commits: ${data.length}
-`);

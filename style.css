@@ -333,3 +333,32 @@ html[data-color-scheme='dark'] .resume section {
   grid-column: 2;
   margin: 0;
 }
+
+/* Unit visualization circles */
+.loc {
+  display: flex;
+  width: 0.5em;
+  aspect-ratio: 1;
+  background: steelblue;
+  border-radius: 50%;
+}
+
+/* Allow wrapping and tight packing */
+#files dd {
+  grid-column: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  align-content: start;
+  gap: 0.15em;
+  padding-top: 0.6em;
+  margin-left: 0;
+}
+
+/* Optional: small text for total lines in <dt> */
+#files dt small {
+  display: block;
+  font-size: 0.8em;
+  opacity: 0.6;
+}
+
