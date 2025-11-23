@@ -27,7 +27,7 @@ function processCommits(data) {
         const { author, date, time, timezone, datetime } = lines[0];
         const ret = {
             id: commit,
-            url: 'https://github.com/tatiii27/portfolio/commit/' + commit,
+            url: 'https://github.com/AlbabNewaz/DSC209R_lab1_portofolio/commit/' + commit,
             author, 
             date, 
             time, 
