@@ -303,6 +303,32 @@ html[data-color-scheme='dark'] .resume section {
   border-bottom: 1px solid color-mix(in oklch, canvastext 15%, transparent);
 }
 
+/* ---------------- SCROLLY TWO: FILE EVOLUTION ---------------- */
+
+#scrolly-2 {
+  position: relative;
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+  margin-top: 2rem;
+}
+
+/* Left side = text */
+#file-story {
+  flex: 1;
+  position: relative;
+}
+
+/* Right side = sticky commit timeline */
+#files {
+  flex: 1;
+  position: sticky;
+  top: 80px;      /* same as scatter-plot */
+  height: 60vh;   /* required for sticky */
+  overflow-y: auto;
+  padding-right: 1rem;
+}
+
 /* ---------------- FILES LAYOUT ---------------- */
 
 #files {
