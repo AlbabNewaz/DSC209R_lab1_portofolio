@@ -51,30 +51,35 @@
 
         <h2>Meta over time</h2>
 
+<div id="evolution-layout">
 
-        <div id="evolution-layout">
+    <!-- ONE FLEX WRAPPER -->
+    <div id="scrolly-1">
 
-            <div id="scrolly-1">
-                <div id="scatter-story"></div>
-            </div>
+        <!-- LEFT: Story -->
+        <div id="scatter-story"></div>
 
-            <div id="scatter-plot">
-                <h2>Commits by time of day</h2>
-                <div id="chart"></div>
+        <!-- RIGHT: Sticky chart -->
+        <div id="scatter-plot">
+            <h2>Commits by time of day</h2>
+            <div id="chart"></div>
 
-                <dl id="commit-tooltip" class="info tooltip" hidden>
-                    <dt>Commit</dt><dd><a href="" id="commit-link" target="_blank" rel="noopener noreferrer"></a></dd>
-                    <dt>Date</dt><dd id="commit-date"></dd>
-                    <dt>Time</dt><dd id="commit-time"></dd>
-                    <dt>Author</dt><dd id="commit-author"></dd>
-                    <dt>Lines edited</dt><dd id="commit-lines"></dd>
-                </dl>
+            <dl id="commit-tooltip" class="info tooltip" hidden>
+                <dt>Commit</dt><dd><a href="" id="commit-link" target="_blank" rel="noopener noreferrer"></a></dd>
+                <dt>Date</dt><dd id="commit-date"></dd>
+                <dt>Time</dt><dd id="commit-time"></dd>
+                <dt>Author</dt><dd id="commit-author"></dd>
+                <dt>Lines edited</dt><dd id="commit-lines"></dd>
+            </dl>
 
-                <p id="selection-count">No commits selected</p>
-                <h3>Language breakdown (selected)</h3>
-                <dl id="language-breakdown" class="stats"></dl>
-            </div>
+            <p id="selection-count">No commits selected</p>
+            <h3>Language breakdown (selected)</h3>
+            <dl id="language-breakdown" class="stats"></dl>
         </div>
+
+    </div>
+</div>
+
 
         <h2>Meta evolution</h2>
         <div id="code-layout">

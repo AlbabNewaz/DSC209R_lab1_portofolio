@@ -462,3 +462,56 @@ circle.selected {
 #scrolly-2 .step + .step {
   margin-top: 0.75rem;   
 }
+
+
+/* --- TWO-COLUMN SCROLLY LAYOUT --- */
+
+#scrolly-1 {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+/* Story column */
+#scatter-story {
+  flex: 1;
+}
+
+/* Chart column */
+#scatter-plot {
+  flex: 1;
+  position: sticky;
+  top: 80px;       /* adjust depending on your navbar height */
+  height: 50vh;    /* MUST HAVE or sticky will not work */
+}
+
+#scatter-plot svg {
+  width: 100%;
+  height: 100%;
+}
+
+
+#scrolly-1 {
+  position: relative;
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+#scatter-story {
+  flex: 1;
+}
+
+#scatter-plot {
+  flex: 1;
+  position: sticky;
+  top: 80px;  /* You may tweak this */
+  height: 60vh;
+}
+
+#scatter-plot svg {
+  width: 100%;
+  height: 100%;
+}
