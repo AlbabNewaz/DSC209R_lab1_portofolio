@@ -34,11 +34,10 @@ const selectionBox = d3.select("#selection-summary");
 const data = await d3.csv(csvPath, d => {
   const [h, m, s] = d.time.split(":").map(Number);
   return {
-    id: d.commit + "_" + d.line,   // unique id per line
+    id: d.commit + d.file + d.line, // unique id per line per commit
     file: d.file,
     type: d.type,
     commit: d.commit,
-    line: +d.line,
     date: new Date(d.date),
     minutes: h * 60 + m + s / 60,
     lines: +d.length
@@ -97,14 +96,22 @@ const radius = d => Math.sqrt(commitCount.get(d.commit) || 1) * 2;
 // Draw circles container
 const dots = g.append("g").attr("class", "dots");
 
+// Render function with smooth transitions
 function renderCircles(commits) {
   const sortedCommits = d3.sort(commits, d => -d.lines);
 
   const circles = dots.selectAll("circle")
-    .data(sortedCommits, d => d.id); // stable circles by id
+    .data(sortedCommits, d => d.id);
+
+  // EXIT
+  circles.exit()
+    .transition()
+    .duration(300)
+    .attr("r", 0)
+    .remove();
 
   // ENTER
-  circles.enter()
+  const enterCircles = circles.enter()
     .append("circle")
     .attr("r", 0)
     .attr("cx", d => x(d.date))
@@ -124,25 +131,16 @@ function renderCircles(commits) {
         .style("left", e.pageX + 15 + "px")
         .style("top", e.pageY + "px");
     })
-    .on("mouseout", () => tooltip.style("opacity", 0))
-    .transition()
-    .duration(500)
-    .attr("r", d => radius(d));
+    .on("mouseout", () => tooltip.style("opacity", 0));
 
-  // UPDATE + ENTER merge
-  circles.merge(circles.enter())
+  // ENTER 
+  enterCircles.merge(circles)
     .transition()
     .duration(500)
     .attr("cx", d => x(d.date))
     .attr("cy", d => y(d.minutes))
+    .attr("r", d => radius(d))
     .attr("fill", d => color(d.type));
-
-  // EXIT
-  circles.exit()
-    .transition()
-    .duration(300)
-    .attr("r", 0)
-    .remove();
 }
 
 // Function to update axes
@@ -150,11 +148,11 @@ function updateAxes(commits) {
   x.domain(d3.extent(commits, d => d.date));
   y.domain(d3.extent(commits, d => d.minutes));
 
-  g.select("g.x-axis").call(xAxis);
-  g.select("g.y-axis").call(yAxis);
+  g.select("g.x-axis").transition().duration(500).call(xAxis);
+  g.select("g.y-axis").transition().duration(500).call(yAxis);
 }
 
-// File display with unit visualization
+// File display
 function updateFileDisplay(filteredCommits) {
   const files = d3.groups(filteredCommits, d => d.file)
     .map(([name, lines]) => ({ name, lines }));
@@ -171,19 +169,17 @@ function updateFileDisplay(filteredCommits) {
       exit => exit.remove()
     );
 
-  // File name and total lines
-  filesContainer.select("dt > code")
-    .html(d => `${d.name} <small>(${d.lines.length} lines)</small>`);
-
-  // Unit visualization: one div per line
+  filesContainer.select("dt > code").text(d => d.name);
+  
+  // Unit visualization for lines
   filesContainer.select("dd")
     .selectAll("div.loc")
-    .data(d => d.lines, d => d.line)
-    .join(
-      enter => enter.append("div").attr("class", "loc"),
-      update => update,
-      exit => exit.remove()
-    );
+    .data(d => d.lines)
+    .join("div")
+    .attr("class", "loc");
+
+  filesContainer.select("dd").selectAll("small").remove();
+  filesContainer.select("dt").append("small").text(d => `${d.lines.length} lines`);
 }
 
 // Selection summary
