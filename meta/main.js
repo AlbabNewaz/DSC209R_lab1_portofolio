@@ -100,16 +100,13 @@ const dots = g.append("g").attr("class", "dots");
 function renderCircles(commits) {
   const sortedCommits = d3.sort(commits, d => -d.lines);
 
-  dots.selectAll("circle")
-    .data(sortedCommits, d => d.id) // stable circles
-    .join(
-      enter => enter.append("circle")
-                    .attr("r", 0) // start radius for transition
-                    .style("transition", "r 300ms")
-                    .call(enter => enter.transition().attr("r", d => radius(d))),
-      update => update,
-      exit => exit.remove()
-    )
+  const circles = dots.selectAll("circle")
+    .data(sortedCommits, d => d.id); // stable circles by id
+
+  // ENTER
+  circles.enter()
+    .append("circle")
+    .attr("r", 0)
     .attr("cx", d => x(d.date))
     .attr("cy", d => y(d.minutes))
     .attr("fill", d => color(d.type))
@@ -127,7 +124,25 @@ function renderCircles(commits) {
         .style("left", e.pageX + 15 + "px")
         .style("top", e.pageY + "px");
     })
-    .on("mouseout", () => tooltip.style("opacity", 0));
+    .on("mouseout", () => tooltip.style("opacity", 0))
+    .transition()
+    .duration(500)
+    .attr("r", d => radius(d));
+
+  // UPDATE + ENTER merge
+  circles.merge(circles.enter())
+    .transition()
+    .duration(500)
+    .attr("cx", d => x(d.date))
+    .attr("cy", d => y(d.minutes))
+    .attr("fill", d => color(d.type));
+
+  // EXIT
+  circles.exit()
+    .transition()
+    .duration(300)
+    .attr("r", 0)
+    .remove();
 }
 
 // Function to update axes
