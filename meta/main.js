@@ -4,17 +4,6 @@ const csvPath = "./loc.csv";
 
 let commitProgress = 100;
 
-
-let timeScale = d3
-  .scaleTime()
-  .domain([
-    d3.min(commits, (d) => d.datetime),
-    d3.max(commits, (d) => d.datetime),
-  ])
-  .range([0, 100]);
-let commitMaxTime = timeScale.invert(commitProgress);
-
-
 // SVG setup
 const svg = d3.select("#scatterplot");
 const width = 900;
@@ -55,6 +44,21 @@ const data = await d3.csv(csvPath, d => {
     lines: +d.length
   };
 });
+
+
+
+
+let timeScale = d3
+  .scaleTime()
+  .domain([
+    d3.min(commits, (d) => d.datetime),
+    d3.max(commits, (d) => d.datetime),
+  ])
+  .range([0, 100]);
+let commitMaxTime = timeScale.invert(commitProgress);
+
+
+
 
 // Circle radius based on commits
 const commitCount = d3.rollup(data, v => v.length, d => d.commit);
