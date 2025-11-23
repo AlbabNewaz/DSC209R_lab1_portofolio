@@ -2,9 +2,9 @@ import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 
 const csvPath = "./loc.csv";
 
-// -----------------------------
-// SVG SETUP
-// -----------------------------
+let commitProgress = 100;
+
+// SVG setup
 const svg = d3.select("#scatterplot");
 const width = 900;
 const height = 500;
@@ -32,9 +32,7 @@ const tooltip = d3.select("body")
 const summaryBox = d3.select("#summary");
 const selectionBox = d3.select("#selection-summary");
 
-// -----------------------------
-// LOAD CSV
-// -----------------------------
+// Load CSV
 const data = await d3.csv(csvPath, d => {
   const [h, m, s] = d.time.split(":").map(Number);
   return {
@@ -47,46 +45,15 @@ const data = await d3.csv(csvPath, d => {
   };
 });
 
-// -----------------------------
-// SLIDER SETUP
-// -----------------------------
-const commitTimeScale = d3.scaleTime()
+// Time scale for slider
+const timeScale = d3.scaleTime()
   .domain(d3.extent(data, d => d.date))
   .range([0, 100]);
 
-let commitProgress = 100;
-let commitMaxTime = commitTimeScale.invert(commitProgress);
+let filteredCommits = data; // initially all commits
 
-const slider = document.getElementById("commit-progress");
-const timeDisplay = document.getElementById("commit-time");
-
-function updateTimeDisplay() {
-  commitProgress = +slider.value;
-  commitMaxTime = commitTimeScale.invert(commitProgress);
-
-  timeDisplay.textContent = commitMaxTime.toLocaleString("en-US", {
-    dateStyle: "long",
-    timeStyle: "short"
-  });
-}
-
-// Initialize display
-updateTimeDisplay();
-
-// Update on slider move
-slider.addEventListener("input", updateTimeDisplay);
-
-// -----------------------------
-// SCALES & AXES
-// -----------------------------
-const commitCount = d3.rollup(data, v => v.length, d => d.commit);
-const radius = d => Math.sqrt(commitCount.get(d.commit) || 1) * 2;
-
-const x = d3.scaleTime()
-  .domain(d3.extent(data, d => d.date))
-  .range([0, innerW])
-  .nice();
-
+// Scales
+const x = d3.scaleTime().range([0, innerW]).nice();
 const y = d3.scaleLinear()
   .domain(d3.extent(data, d => d.minutes))
   .range([innerH, 0])
@@ -94,89 +61,101 @@ const y = d3.scaleLinear()
 
 const color = d3.scaleOrdinal(d3.schemeTableau10);
 
+// Circle radius based on commits
+const commitCount = d3.rollup(data, v => v.length, d => d.commit);
+const radius = d => Math.sqrt(commitCount.get(d.commit) || 1) * 2;
+
 // Axes
-const xAxis = d3.axisBottom(x).tickFormat(d3.timeFormat("%b %d"));
-const yAxis = d3.axisLeft(y).tickFormat(d => {
+g.append("g").attr("class", "x-axis").attr("transform", `translate(0,${innerH})`);
+g.append("g").attr("class", "y-axis").call(d3.axisLeft(y).tickFormat(d => {
   const hh = Math.floor(d / 60);
   const mm = Math.floor(d % 60);
   return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
-});
+}));
 
-g.append("g")
-  .attr("transform", `translate(0,${innerH})`)
-  .call(xAxis)
-  .append("text")
-  .attr("x", innerW / 2)
-  .attr("y", 40)
-  .attr("fill", "black")
-  .attr("text-anchor", "middle")
-  .attr("font-size", "14px")
-  .text("Date");
+// Group for dots
+g.append("g").attr("class", "dots");
 
-g.append("g")
-  .call(yAxis)
-  .append("text")
-  .attr("x", -innerH / 2)
-  .attr("y", -60)
-  .attr("transform", "rotate(-90)")
-  .attr("fill", "black")
-  .attr("text-anchor", "middle")
-  .attr("font-size", "14px")
-  .text("Time (HH:MM)");
-
-// -----------------------------
-// DRAW CIRCLES
-// -----------------------------
-const circles = g.selectAll("circle")
-  .data(data)
-  .enter()
-  .append("circle")
-  .attr("cx", d => x(d.date))
-  .attr("cy", d => y(d.minutes))
-  .attr("r", d => radius(d))
-  .attr("fill", d => color(d.type))
-  .attr("opacity", 0.8)
-  .on("mouseover", (e, d) => {
-    tooltip
-      .style("opacity", 1)
-      .html(`
-        <strong>File:</strong> ${d.file}<br>
-        <strong>Language:</strong> ${d.type}<br>
-        <strong>Date:</strong> ${d.date.toLocaleDateString()}<br>
-        <strong>Time:</strong> ${Math.floor(d.minutes/60).toString().padStart(2,"0")}:${Math.floor(d.minutes%60).toString().padStart(2,"0")}<br>
-        <strong>Lines:</strong> ${d.lines}<br>
-        <strong>Commit:</strong> ${d.commit}
-      `)
-      .style("left", e.pageX + 15 + "px")
-      .style("top", e.pageY + "px");
-  })
-  .on("mouseout", () => tooltip.style("opacity", 0));
-
-// -----------------------------
-// BRUSH
-// -----------------------------
+// Brush
 const brush = d3.brush()
   .extent([[0, 0], [innerW, innerH]])
   .on("brush end", brushed);
 
-g.append("g").call(brush);
+g.append("g").attr("class", "brush").call(brush);
 
+// Update scatter plot
+function updateScatterPlot(commits) {
+  // Update x scale
+  x.domain(d3.extent(commits, d => d.date));
+
+  // Update x-axis
+  const xAxis = d3.axisBottom(x).tickFormat(d3.timeFormat("%b %d"));
+  g.select("g.x-axis").call(xAxis);
+
+  // Bind data
+  const dots = g.select("g.dots").selectAll("circle").data(commits, d => d.commit);
+
+  // Enter / update / exit
+  dots.join(
+    enter => enter.append("circle")
+      .attr("cx", d => x(d.date))
+      .attr("cy", d => y(d.minutes))
+      .attr("r", d => radius(d))
+      .attr("fill", d => color(d.type))
+      .attr("opacity", 0.8)
+      .on("mouseover", (e, d) => {
+        tooltip.style("opacity", 1)
+          .html(`
+            <strong>File:</strong> ${d.file}<br>
+            <strong>Language:</strong> ${d.type}<br>
+            <strong>Date:</strong> ${d.date.toLocaleDateString()}<br>
+            <strong>Time:</strong> ${Math.floor(d.minutes/60).toString().padStart(2,"0")}:${Math.floor(d.minutes%60).toString().padStart(2,"0")}<br>
+            <strong>Lines:</strong> ${d.lines}<br>
+            <strong>Commit:</strong> ${d.commit}
+          `)
+          .style("left", e.pageX + 15 + "px")
+          .style("top", e.pageY + "px");
+      })
+      .on("mouseout", () => tooltip.style("opacity", 0)),
+
+    update => update
+      .transition().duration(200)
+      .attr("cx", d => x(d.date))
+      .attr("cy", d => y(d.minutes)),
+
+    exit => exit.remove()
+  );
+}
+
+// Update commit summary
+function updateCommitSummary(commits) {
+  const files = new Set(commits.map(d => d.file));
+  const langs = new Set(commits.map(d => d.type));
+  summaryBox.html(`
+    <h2>Summary</h2>
+    Files: ${files.size}<br>
+    Languages: ${langs.size}<br>
+    Total Commits: ${commits.length}
+  `);
+}
+
+// Handle brushing
 function brushed({ selection }) {
   if (!selection) {
-    circles.attr("opacity", 0.8);
+    g.selectAll("circle").attr("opacity", 0.8);
     selectionBox.html("");
     return;
   }
 
   const [[x0, y0], [x1, y1]] = selection;
 
-  const selected = data.filter(d => {
+  const selected = filteredCommits.filter(d => {
     const cx = x(d.date);
     const cy = y(d.minutes);
     return x0 <= cx && cx <= x1 && y0 <= cy && cy <= y1;
   });
 
-  circles.attr("opacity", d => {
+  g.selectAll("circle").attr("opacity", d => {
     const cx = x(d.date);
     const cy = y(d.minutes);
     return x0 <= cx && cx <= x1 && y0 <= cy && cy <= y1 ? 1 : 0.15;
@@ -212,15 +191,23 @@ function brushed({ selection }) {
   selectionBox.html(html);
 }
 
-// -----------------------------
-// SUMMARY
-// -----------------------------
-const files = new Set(data.map(d => d.file));
-const langs = new Set(data.map(d => d.type));
+// Slider change handler
+function onTimeSliderChange() {
+  const slider = document.getElementById("commit-progress");
+  commitProgress = +slider.value;
 
-summaryBox.html(`
-  <h2>Summary</h2>
-  Files: ${files.size}<br>
-  Languages: ${langs.size}<br>
-  Total Commits: ${data.length}
-`);
+  const commitMaxTime = timeScale.invert(commitProgress);
+  filteredCommits = data.filter(d => d.date <= commitMaxTime);
+
+  updateScatterPlot(filteredCommits);
+  updateCommitSummary(filteredCommits);
+
+  const timeEl = document.getElementById("commit-time");
+  timeEl.textContent = commitMaxTime.toLocaleString("en-US", { dateStyle: "long", timeStyle: "short" });
+}
+
+// Attach slider event
+document.getElementById("commit-progress").addEventListener("input", onTimeSliderChange);
+
+// Initialize
+onTimeSliderChange();
