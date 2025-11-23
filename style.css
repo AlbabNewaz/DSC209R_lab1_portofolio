@@ -358,8 +358,6 @@ dd {
   font-size: 0.8em;
   opacity: 0.6;
 }
-
-
 #scrolly-1 {
   position: relative;
   display: flex;
@@ -369,11 +367,9 @@ dd {
     flex: 1;
   }
 }
-
 #scatter-story {
   position: relative;
 }
-
 #scatter-plot {
   position: sticky;
   top: 0;
