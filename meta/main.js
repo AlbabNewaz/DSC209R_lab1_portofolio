@@ -34,7 +34,7 @@ const selectionBox = d3.select("#selection-summary");
 const data = await d3.csv(csvPath, d => {
   const [h, m, s] = d.time.split(":").map(Number);
   return {
-    id: d.commit + "-" + d.file + "-" + d.line, // unique per line
+    id: d.commit + "_" + d.file + "_" + d.line, // unique id per line
     file: d.file,
     type: d.type,
     commit: d.commit,
@@ -109,11 +109,13 @@ function renderCircles(commits) {
                     .attr("fill", d => color(d.type))
                     .attr("opacity", 0.8)
                     .call(enter => enter.transition().attr("r", d => radius(d))),
-      update => update.transition().duration(300)
+      update => update.transition()
+                      .duration(300)
                       .attr("cx", d => x(d.date))
                       .attr("cy", d => y(d.minutes))
-                      .attr("r", d => radius(d)),
-      exit => exit.transition().duration(300).attr("r", 0).remove()
+                      .attr("r", d => radius(d))
+                      .attr("fill", d => color(d.type)),
+      exit => exit.transition().attr("r", 0).remove()
     )
     .on("mouseover", (e, d) => {
       tooltip.style("opacity", 1)
@@ -136,14 +138,19 @@ function updateAxes(commits) {
   x.domain(d3.extent(commits, d => d.date));
   y.domain(d3.extent(commits, d => d.minutes));
 
-  g.select("g.x-axis").call(xAxis);
-  g.select("g.y-axis").call(yAxis);
+  g.select("g.x-axis").transition().duration(300).call(xAxis);
+  g.select("g.y-axis").transition().duration(300).call(yAxis);
 }
 
-// Fixed file display
+// File display
 function updateFileDisplay(filteredCommits) {
-  const files = d3.groups(filteredCommits, d => d.file)
-    .map(([name, lines]) => ({ name, lines }));
+  const lines = filteredCommits;
+  
+  const files = d3.groups(lines, d => d.file)
+    .map(([name, lines]) => ({ name, lines }))
+    .sort((a, b) => b.lines.length - a.lines.length);
+
+  const colors = d3.scaleOrdinal(d3.schemeTableau10);
 
   const filesContainer = d3.select("#files")
     .selectAll("div")
@@ -157,28 +164,15 @@ function updateFileDisplay(filteredCommits) {
       exit => exit.remove()
     );
 
-  // Update file name
-  filesContainer.select("dt > code").text(d => d.name);
+  filesContainer.select("dt > code")
+    .html(d => `${d.name}<br><small>${d.lines.length} lines</small>`);
 
-  // Unit visualization for lines
-  const dd = filesContainer.select("dd");
-
-  dd.selectAll("div.loc")
+  filesContainer.select("dd")
+    .selectAll("div")
     .data(d => d.lines)
-    .join(
-      enter => enter.append("div").attr("class", "loc"),
-      update => update,
-      exit => exit.remove()
-    );
-
-  // Total line count per file
-  filesContainer.select("dt")
-    .selectAll("small")
-    .data(d => [d])
-    .join(
-      enter => enter.append("small").text(d => `${d.lines.length} lines`),
-      update => update.text(d => `${d.lines.length} lines`)
-    );
+    .join("div")
+    .attr("class", "loc")
+    .attr("style", d => `background-color: ${colors(d.type)}`);
 }
 
 // Selection summary

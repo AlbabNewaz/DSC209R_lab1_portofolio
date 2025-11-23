@@ -339,12 +339,10 @@ html[data-color-scheme='dark'] .resume section {
   display: flex;
   width: 0.5em;
   aspect-ratio: 1;
-  background: steelblue;
   border-radius: 50%;
 }
 
-/* Allow wrapping and tight packing */
-#files dd {
+dd {
   grid-column: 2;
   display: flex;
   flex-wrap: wrap;
@@ -354,6 +352,8 @@ html[data-color-scheme='dark'] .resume section {
   padding-top: 0.6em;
   margin-left: 0;
 }
+
+
 
 /* Optional: small text for total lines in <dt> */
 #files dt small {
