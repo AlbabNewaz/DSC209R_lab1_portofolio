@@ -1,78 +1,88 @@
 import * as d3 from "https://cdn.skypack.dev/d3@7";
 
-// Load CSV
-const csvPath = "loc.csv";
-let commits = [];
+let data = [];
+let filteredCommits = [];
 
-d3.csv(csvPath, d3.autoType).then((data) => {
-  commits = data;
-  commits.forEach(d => {
-    d.datetime = new Date(d.datetime);
-    d.hourFrac = d.datetime.getHours() + d.datetime.getMinutes()/60;
-  });
+// Dimensions
+const margin = { top: 20, right: 20, bottom: 40, left: 50 };
+const width = 800 - margin.left - margin.right;
+const height = 400 - margin.top - margin.bottom;
 
-  updateSlider();
-  updateScatterPlot(commits);
-  updateFileDisplay(commits);
-});
+// Parse date/time
+const parseDateTime = d3.utcParse("%Y-%m-%dT%H:%M:%S%Z");
 
-// -----------------------------
-// Slider logic
-// -----------------------------
-const slider = d3.select("#commit-progress");
-const timeLabel = d3.select("#commit-time");
-
-slider.on("input", () => {
-  const percent = +slider.node().value;
-  const cutoff = new Date(
-    d3.quantile(
-      commits.map(d => d.datetime).sort(d3.ascending),
-      percent / 100
-    )
-  );
-
-  const filteredCommits = commits.filter(d => d.datetime <= cutoff);
-  timeLabel.text(d3.timeFormat("%Y-%m-%d %H:%M")(cutoff));
-
-  updateScatterPlot(filteredCommits);
-  updateFileDisplay(filteredCommits);
-});
-
-function updateSlider() {
-  const latest = d3.max(commits, d => d.datetime);
-  timeLabel.text(d3.timeFormat("%Y-%m-%d %H:%M")(latest));
-}
-
-// -----------------------------
-// Scatterplot
-// -----------------------------
-const svg = d3.select("#scatterplot");
-const margin = { top: 20, right: 20, bottom: 30, left: 50 };
-let width = 900 - margin.left - margin.right;
-let height = 400 - margin.top - margin.bottom;
-
-svg
-  .attr("width", width + margin.left + margin.right)
-  .attr("height", height + margin.top + margin.bottom);
-
-const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
-
+// Create scales
 const xScale = d3.scaleTime().range([0, width]);
 const yScale = d3.scaleLinear().range([height, 0]);
 
-const xAxis = g.append("g").attr("transform", `translate(0,${height})`);
-const yAxis = g.append("g");
+// Create axes
+const xAxis = d3.select("#scatterplot")
+  .append("g")
+  .attr("transform", `translate(0, ${height})`);
+const yAxis = d3.select("#scatterplot")
+  .append("g");
 
-const dotsGroup = g.append("g").attr("class", "dots");
+// Create dots group
+const svg = d3.select("#scatterplot")
+  .attr("width", width + margin.left + margin.right)
+  .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+  .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
+const dotsGroup = svg.append("g").attr("class", "dots");
+
+// Load CSV
+d3.csv("loc.csv").then(rawData => {
+  // Prepare data
+  data = rawData.map(d => ({
+    file: d.file,
+    line: +d.line,
+    commit: d.commit,
+    author: d.author,
+    datetime: parseDateTime(d.datetime),
+    hourFrac: +d.time.split(":")[0] + (+d.time.split(":")[1] / 60),
+    lines: [{ file: d.file, line: +d.line }]
+  }));
+
+  // Initial filter: all commits
+  filteredCommits = data;
+  updateScatterPlot(filteredCommits);
+  updateFileDisplay(filteredCommits);
+
+  // Setup slider
+  const slider = d3.select("#commit-progress");
+  slider.on("input", function () {
+    const percent = +this.value;
+    const cutoffIndex = Math.floor(data.length * (percent / 100));
+    filteredCommits = data.slice(0, cutoffIndex);
+    updateScatterPlot(filteredCommits);
+    updateFileDisplay(filteredCommits);
+
+    // Update time display
+    const lastCommit = filteredCommits[filteredCommits.length - 1];
+    if (lastCommit) {
+      d3.select("#commit-time").text(lastCommit.datetime.toISOString());
+    } else {
+      d3.select("#commit-time").text("");
+    }
+  });
+});
+
+// -------------------------
+// Scatterplot update
+// -------------------------
 function updateScatterPlot(filteredCommits) {
-  xScale.domain(d3.extent(filteredCommits, d => d.datetime));
+  const sortedCommits = filteredCommits.slice().sort((a, b) => d3.ascending(a.datetime, b.datetime));
+
+  // Update scales
+  xScale.domain(d3.extent(sortedCommits, d => d.datetime));
   yScale.domain([0, 24]);
 
   xAxis.call(d3.axisBottom(xScale));
   yAxis.call(d3.axisLeft(yScale));
 
-  const dots = dotsGroup.selectAll("circle").data(filteredCommits, d => d.commit);
+  // Join circles using commit id as key
+  const dots = dotsGroup.selectAll("circle").data(sortedCommits, d => d.commit);
 
   dots.join(
     enter => enter.append("circle")
@@ -85,43 +95,41 @@ function updateScatterPlot(filteredCommits) {
       .attr("r", 4),
     update => update.transition().duration(300)
       .attr("cx", d => xScale(d.datetime))
-      .attr("cy", d => yScale(d.hourFrac)),
+      .attr("cy", d => yScale(d.hourFrac))
+      .attr("r", 4),
     exit => exit.transition().duration(300).attr("r", 0).remove()
   );
 }
 
-// -----------------------------
-// File/unit visualization
-// -----------------------------
+// -------------------------
+// File list / unit visualization
+// -------------------------
 function updateFileDisplay(filteredCommits) {
-  // Flatten lines per commit
-  const lines = filteredCommits.flatMap(d => ({
-    file: d.file,
-    commit: d.commit
-  }));
-
-  const files = d3.groups(lines, d => d.file)
-    .map(([name, lines]) => ({ name, lines }));
+  const lines = filteredCommits.flatMap(d => d.lines);
+  const files = d3.groups(lines, d => d.file).map(([name, lines]) => ({ name, lines }));
 
   const filesContainer = d3.select("#files")
     .selectAll("div")
     .data(files, d => d.name)
     .join(
-      enter => enter.append("div")
-        .call(div => {
-          div.append("dt").append("code");
-          div.append("dd");
-        })
+      enter => enter.append("div").call(div => {
+        div.append("dt").append("code");
+        div.append("dd");
+      })
     );
 
-  // Update file name and count
+  // Update dt with file name and total lines
   filesContainer.select("dt > code")
-    .html(d => `${d.name} <small>${d.lines.length} lines</small>`);
+    .text(d => `${d.name} (total: ${d.lines.length})`);
 
-  // Add one div per line
-  filesContainer.select("dd")
+  // Update dd with one div per line
+  const lineDivs = filesContainer.select("dd")
     .selectAll("div")
-    .data(d => d.lines)
-    .join("div")
-    .attr("class", "loc");
+    .data(d => d.lines, d => d.line);
+
+  lineDivs.join(
+    enter => enter.append("div").attr("class", "loc"),
+    update => update,
+    exit => exit.remove()
+  );
 }
