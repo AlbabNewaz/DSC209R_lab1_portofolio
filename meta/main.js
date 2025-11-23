@@ -2,6 +2,19 @@ import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 
 const csvPath = "./loc.csv";
 
+let commitProgress = 100;
+
+
+let timeScale = d3
+  .scaleTime()
+  .domain([
+    d3.min(commits, (d) => d.datetime),
+    d3.max(commits, (d) => d.datetime),
+  ])
+  .range([0, 100]);
+let commitMaxTime = timeScale.invert(commitProgress);
+
+
 // SVG setup
 const svg = d3.select("#scatterplot");
 const width = 900;
