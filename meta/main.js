@@ -1,147 +1,86 @@
-import * as d3 from "https://cdn.skypack.dev/d3";
+import * as d3 from "https://cdn.skypack.dev/d3@7";
 
-// ----------------------
-// Data Loading & Init
-// ----------------------
-let commits = []; // will hold all commits
-let filteredCommits = []; // commits filtered by slider
+// Load CSV
+const commitsData = await d3.csv("loc.csv", d3.autoType);
 
-let xScale, yScale;
-let commitMaxTime;
-
-// Load CSV or JSON data
-d3.json('loc.csv').then((data) => {
-  commits = data.map((d) => ({
-    ...d,
-    datetime: new Date(d.datetime),
-    hourFrac: +d.hourFrac,
-    totalLines: +d.totalLines,
-    id: d.id,
-    lines: d.lines // array of {file, lineNumber}
-  }));
-
-  // Initial scales
-  xScale = d3.scaleTime().range([50, 950]);
-  yScale = d3.scaleLinear().range([10, 590]);
-
-  commitMaxTime = d3.max(commits, (d) => d.datetime);
-  filteredCommits = commits;
-
-  renderScatterPlot(commits);
-  updateFileDisplay(filteredCommits);
-  setupSlider();
+// Group lines by commit
+const commitsMap = d3.groups(commitsData, d => d.commit).map(([commit, lines]) => {
+  return {
+    id: commit,
+    datetime: new Date(lines[0].datetime),
+    hourFrac: lines[0].time.split(":")[0] + Number(lines[0].time.split(":")[1])/60, // optional
+    lines: lines.map(d => ({ file: d.file, lineNumber: d.line })),
+  };
 });
 
-// ----------------------
-// Scatterplot
-// ----------------------
-function renderScatterPlot(commits) {
-  const svg = d3.select('#scatterplot')
-    .attr('width', 1000)
-    .attr('height', 600);
+let filteredCommits = commitsMap;
 
-  xScale.domain(d3.extent(commits, (d) => d.datetime));
-  yScale.domain([0, 24]);
+// --- SCATTERPLOT SETUP ---
+const svg = d3.select("#scatterplot");
+const width = 900, height = 300;
+svg.attr("width", width).attr("height", height);
 
-  const xAxis = d3.axisBottom(xScale);
-  const yAxis = d3.axisLeft(yScale);
+const xScale = d3.scaleTime()
+  .domain(d3.extent(filteredCommits, d => d.datetime))
+  .range([50, width-50]);
 
-  svg.append('g')
-    .attr('class', 'x-axis')
-    .attr('transform', `translate(0, 590)`)
-    .call(xAxis);
+const yScale = d3.scaleLinear()
+  .domain([0, 24])
+  .range([height-20, 20]);
 
-  svg.append('g')
-    .attr('class', 'y-axis')
-    .attr('transform', `translate(50, 0)`)
-    .call(yAxis);
+// Axes
+svg.append("g").call(d3.axisBottom(xScale)).attr("transform", `translate(0,${height-20})`);
+svg.append("g").call(d3.axisLeft(yScale)).attr("transform", `translate(50,0)`);
 
-  svg.append('g').attr('class', 'dots');
+// Circles
+const dots = svg.append("g").attr("class", "dots");
 
-  updateScatterPlot(commits);
+function renderScatterPlot() {
+  dots.selectAll("circle")
+    .data(filteredCommits, d => d.id)
+    .join("circle")
+    .attr("cx", d => xScale(d.datetime))
+    .attr("cy", d => yScale(d.hourFrac))
+    .attr("r", 5)
+    .style("fill", "steelblue");
 }
 
-function updateScatterPlot(commits) {
-  const svg = d3.select('#scatterplot');
+renderScatterPlot();
 
-  xScale.domain(d3.extent(commits, (d) => d.datetime));
-  const [minLines, maxLines] = d3.extent(commits, (d) => d.totalLines);
-  const rScale = d3.scaleSqrt().domain([minLines, maxLines]).range([2, 30]);
+// --- FILE / UNIT VISUALIZATION ---
+function updateFileDisplay(commits) {
+  const lines = commits.flatMap(d => d.lines);
+  const files = d3.groups(lines, d => d.file).map(([name, lines]) => ({ name, lines }));
 
-  // Update x-axis
-  const xAxis = d3.axisBottom(xScale);
-  svg.select('g.x-axis').call(xAxis);
-
-  // Bind dots
-  const dots = svg.select('g.dots');
-  const sortedCommits = d3.sort(commits, (d) => -d.totalLines);
-
-  dots.selectAll('circle')
-    .data(sortedCommits, (d) => d.id)
-    .join('circle')
-    .attr('cx', (d) => xScale(d.datetime))
-    .attr('cy', (d) => yScale(d.hourFrac))
-    .attr('r', (d) => rScale(d.totalLines))
-    .attr('fill', 'steelblue')
-    .style('fill-opacity', 0.7)
-    .on('mouseenter', (event, commit) => {
-      d3.select(event.currentTarget).style('fill-opacity', 1);
-    })
-    .on('mouseleave', (event) => {
-      d3.select(event.currentTarget).style('fill-opacity', 0.7);
-    });
-}
-
-// ----------------------
-// Slider Filtering
-// ----------------------
-function setupSlider() {
-  const slider = d3.select('#commit-progress');
-  const timeLabel = d3.select('#commit-time');
-
-  slider.on('input', (event) => {
-    const pct = +event.target.value / 100;
-    const times = d3.extent(commits, (d) => d.datetime);
-    commitMaxTime = new Date(times[0].getTime() + pct * (times[1] - times[0]));
-
-    filteredCommits = commits.filter((d) => d.datetime <= commitMaxTime);
-
-    updateScatterPlot(filteredCommits);
-    updateFileDisplay(filteredCommits);
-
-    const formatted = commitMaxTime.toLocaleString();
-    timeLabel.text(formatted);
-  });
-
-  // Initialize label
-  timeLabel.text(d3.max(commits, (d) => d.datetime).toLocaleString());
-}
-
-// ----------------------
-// File Unit Visualization
-// ----------------------
-function updateFileDisplay(filteredCommits) {
-  const lines = filteredCommits.flatMap((d) => d.lines);
-
-  const files = d3.groups(lines, (d) => d.file)
-    .map(([name, lines]) => ({ name, lines }));
-
-  const filesContainer = d3.select('#files')
-    .selectAll('div')
-    .data(files, (d) => d.name)
+  const filesContainer = d3.select("#files")
+    .selectAll("div")
+    .data(files, d => d.name)
     .join(
-      (enter) => enter.append('div').call((div) => {
-        div.append('dt').append('code');
-        div.append('dd');
-      }),
+      enter => enter.append("div").call(div => {
+        div.append("dt").append("code");
+        div.append("dd");
+      })
     );
 
-  filesContainer.select('dt > code')
-    .html((d) => `${d.name} <small>${d.lines.length} lines</small>`);
+  filesContainer.select("dt > code")
+    .text(d => `${d.name} (${d.lines.length})`);
 
-  filesContainer.select('dd')
-    .selectAll('div')
-    .data((d) => d.lines)
-    .join('div')
-    .attr('class', 'loc');
+  filesContainer.select("dd")
+    .selectAll("div")
+    .data(d => d.lines)
+    .join("div")
+    .attr("class", "loc");
 }
+
+updateFileDisplay(filteredCommits);
+
+// --- SLIDER ---
+const slider = d3.select("#commit-progress");
+
+slider.on("input", function() {
+  const maxPercent = +this.value;
+  const maxIndex = Math.floor(filteredCommits.length * maxPercent / 100);
+  const visibleCommits = filteredCommits.slice(0, maxIndex);
+  renderScatterPlot(visibleCommits);
+  updateFileDisplay(visibleCommits);
+});
