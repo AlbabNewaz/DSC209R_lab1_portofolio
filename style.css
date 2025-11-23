@@ -306,3 +306,30 @@ html[data-color-scheme='dark'] .resume section {
   --r: attr(r);
   transition: all 200ms ease, r calc(var(--r) * 100ms);
 }
+
+
+#files {
+  display: grid;
+  grid-template-columns: 1fr 4fr;
+  gap: 0.25rem 1rem;
+  margin: 1rem auto;
+  width: 90%;
+  max-width: 1200px;
+}
+
+#files > div {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
+  gap: 0.25rem 1rem;
+}
+
+#files dt {
+  grid-column: 1;
+  font-weight: bold;
+}
+
+#files dd {
+  grid-column: 2;
+  margin: 0;
+}
