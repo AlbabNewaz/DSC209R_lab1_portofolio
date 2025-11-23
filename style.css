@@ -290,3 +290,19 @@ html[data-color-scheme='dark'] .resume section {
   font-weight: bold;
 }
 
+
+/* Scatterplot circles */
+.dots circle {
+  transition: all 200ms ease; /* smooth transition for position, radius, opacity */
+}
+
+/* Animate radius from 0 on entry */
+.dots circle:where(:not([r])) {
+  r: 0; /* starting radius for newly added circles */
+}
+
+/* Optional: make transition duration proportional to circle size */
+.dots circle {
+  --r: attr(r);
+  transition: all 200ms ease, r calc(var(--r) * 100ms);
+}
