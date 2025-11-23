@@ -10,14 +10,16 @@ body {
   margin-inline: auto;
   padding-inline: 1rem;
   background-color: oklch(98% 2% 200);
-  color: black; 
+  color: black;
   transition: background-color 0.3s, color 0.3s;
 }
 
 html[data-color-scheme='dark'] body {
   background-color: oklch(10% 2% 220);
-  color: #eee; 
+  color: #eee;
 }
+
+/* ---------------- NAV ---------------- */
 
 nav {
   display: flex;
@@ -25,8 +27,9 @@ nav {
   align-items: center;
   gap: 1rem;
   padding: 1rem;
+  --nav-h: 70px;
   border-bottom: 2px solid var(--border-color, oklch(50% 10% 200 / 40%));
-  background-color: oklch(98% 2% 200); 
+  background-color: oklch(98% 2% 200);
   transition: background-color 0.3s, color 0.3s;
 }
 
@@ -48,7 +51,7 @@ html[data-color-scheme='dark'] nav a {
 }
 
 nav a:hover {
-  background-color: oklch(90% 40% 300 / 30%); 
+  background-color: oklch(90% 40% 300 / 30%);
 }
 
 html[data-color-scheme='dark'] nav a:hover {
@@ -64,6 +67,8 @@ nav a.current {
 html[data-color-scheme='dark'] nav a.current {
   background-color: oklch(50% 20% 320 / 60%);
 }
+
+/* ---------------- GENERAL ---------------- */
 
 .color-scheme {
   position: absolute;
@@ -84,6 +89,8 @@ img {
   display: block;
   margin: 1rem 0;
 }
+
+/* ---------------- FORMS ---------------- */
 
 form {
   display: grid;
@@ -140,6 +147,8 @@ button:hover {
   background-color: #005fa3;
 }
 
+/* ---------------- PROJECT CARDS ---------------- */
+
 .projects {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(15em, 1fr));
@@ -184,6 +193,8 @@ html[data-color-scheme='dark'] .project {
   line-height: 1.4;
 }
 
+/* ---------------- RESUME ---------------- */
+
 .resume {
   display: grid;
   gap: 2rem;
@@ -200,21 +211,7 @@ html[data-color-scheme='dark'] .resume section {
   border-left-color: oklch(50% 20% 320 / 60%);
 }
 
-#profile-stats dl {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-  text-align: center;
-  margin-top: 1em;
-}
-
-#profile-stats dt {
-  font-weight: bold;
-}
-
-#profile-stats dd {
-  margin: 0;
-}
+/* ---------------- PIE CHART ---------------- */
 
 #projects-pie-plot {
   width: 100%;
@@ -247,8 +244,7 @@ html[data-color-scheme='dark'] .resume section {
   height: 1em;
   aspect-ratio: 1 / 1;
   background-color: var(--color);
-  border-radius: 0.25em;
-  display: inline-block;
+  border-radius: 0.25rem;
 }
 
 #projects-pie-plot path {
@@ -274,39 +270,40 @@ html[data-color-scheme='dark'] .resume section {
   background-color: oklch(80% 20% 320 / 20%);
 }
 
+/* ---------------- SCROLLY TWO-COLUMN LAYOUT ---------------- */
 
-#time-filter {
+#scrolly-1 {
+  position: relative;
   display: flex;
-  align-items: center;
-  gap: 1em;
-  width: 90%;
-  max-width: 1200px;
-  margin: 1em auto;
+  gap: 2rem;
+  align-items: flex-start;
+  margin-top: 2rem;
 }
 
-#commit-time {
-  margin-left: auto;
-  color: black !important;
-  font-weight: bold;
+#scatter-story {
+  flex: 1;
 }
 
-
-/* Scatterplot circles */
-.dots circle {
-  transition: all 200ms ease; /* smooth transition for position, radius, opacity */
+#scatter-plot {
+  flex: 1;
+  position: sticky;
+  top: 80px;
+  height: 60vh;  /* REQUIRED for sticky to work */
 }
 
-/* Animate radius from 0 on entry */
-.dots circle:where(:not([r])) {
-  r: 0; /* starting radius for newly added circles */
+#scatter-plot svg {
+  width: 100%;
+  height: 100%;
 }
 
-/* Optional: make transition duration proportional to circle size */
-.dots circle {
-  --r: attr(r);
-  transition: all 200ms ease, r calc(var(--r) * 100ms);
+/* Steps inside story */
+#scatter-story .step {
+  max-width: 36rem;
+  padding: 0.75rem 0 1rem;
+  border-bottom: 1px solid color-mix(in oklch, canvastext 15%, transparent);
 }
 
+/* ---------------- FILES LAYOUT ---------------- */
 
 #files {
   display: grid;
@@ -317,24 +314,18 @@ html[data-color-scheme='dark'] .resume section {
   max-width: 1200px;
 }
 
-#files > div {
-  display: grid;
-  grid-template-columns: subgrid;
-  grid-column: 1 / -1;
-  gap: 0.25rem 1rem;
-}
-
 #files dt {
-  grid-column: 1;
   font-weight: bold;
 }
 
 #files dd {
-  grid-column: 2;
   margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15em;
+  padding-top: 0.6em;
 }
 
-/* Unit visualization circles */
 .loc {
   display: flex;
   width: 0.5em;
@@ -342,34 +333,10 @@ html[data-color-scheme='dark'] .resume section {
   border-radius: 50%;
 }
 
-dd {
-  grid-column: 2;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: start;
-  align-content: start;
-  gap: 0.15em;
-  padding-top: 0.6em;
-  margin-left: 0;
-}
-#files code {
-  font-size: 0.9rem;
-}
+/* ---------------- SCATTERPLOT CIRCLES ---------------- */
 
-
-
-
-
-
-
-circle {
-  transform-origin: center;
-  transform-box: fill-box;
-  transition: all 200ms ease-out;
-
-  @starting-style {
-    r: 0;
-  }
+.dots circle {
+  transition: all 200ms ease;
 }
 
 circle:hover {
@@ -377,141 +344,5 @@ circle:hover {
 }
 
 circle.selected {
-  fill: #B91C1C
-}
-
-#evolution-layout {
-  display: grid;
-  grid-template-columns: minmax(260px, 1fr) minmax(360px, 1.4fr);
-  gap: 1.5rem;
-  align-items: flex-start;
-  margin-top: 1.5rem;
-}
-
-#scrolly-1 {
-  position: relative;
-}
-
-#scatter-story .step {
-  max-width: 36rem;
-  padding: 0.75rem 0 1rem;
-  border-bottom: 1px solid color-mix(in oklch, canvastext 15%, transparent);
-}
-#scatter-story .step:last-child {
-  padding-bottom: 0.5rem;
-  border-bottom: none;
-}
-
-#scatter-plot {
-  position: sticky;
-  top: calc(var(--nav-h) + 1rem);
-  left: 0;
-  bottom: auto;
-  display: flex;
-  flex-direction: column;
-   gap: 0.75rem;
-  align-items: stretch;
-}
-
-#scatter-plot #chart {
-  flex: 1;
-  min-height: 0;
-}
-
-#selection-count {
-  margin: 0.5rem 0 0.25rem;
-}
-
-#language-breakdown {
-  margin-top: 0.25rem;
-}
-
-#code-layout {
-  display: grid;
-  grid-template-columns: minmax(260px, 1.4fr) minmax(260px, 1fr);
-  gap: 1.5rem;
-  align-items: flex-start;
-  margin-top: 1.5rem;
-}
-#code-layout > div:first-child {
-  position: sticky;
-  top: calc(var(--nav-h) + 1rem);
-  align-self: start;
-  max-height: calc(100vh - var(--nav-h) - 2rem);
-  overflow-y: auto;
-}
-
-
-#scrolly-2 {
-  position: relative;
-}
-#scrolly-2 .step {
-  max-width: 36rem;
-  padding: 0.75rem 0 1rem;
-  border-bottom: 1px solid color-mix(in oklch, canvastext 15%, transparent);
-}
-#scrolly-2 .step p {
-  margin: 0.25rem 0;
-}
-
-#scatter-story .step p,
-#scrolly-2 .step p {
-  margin: 0 0 0.35rem;   
-}
-#scatter-story .step + .step,
-#scrolly-2 .step + .step {
-  margin-top: 0.75rem;   
-}
-
-
-/* --- TWO-COLUMN SCROLLY LAYOUT --- */
-
-#scrolly-1 {
-  position: relative;
-  display: flex;
-  align-items: flex-start;
-  gap: 1.5rem;
-  margin-top: 2rem;
-}
-
-/* Story column */
-#scatter-story {
-  flex: 1;
-}
-
-/* Chart column */
-#scatter-plot {
-  flex: 1;
-  position: sticky;
-  top: 80px;       /* adjust depending on your navbar height */
-  height: 50vh;    /* MUST HAVE or sticky will not work */
-}
-
-#scatter-plot svg {
-  width: 100%;
-  height: 100%;
-}
-
-
-#scrolly-1 {
-  position: relative;
-  display: flex;
-  gap: 2rem;
-  align-items: flex-start;
-}
-
-#scatter-story {
-  flex: 1;
-}
-
-#scatter-plot {
-  flex: 1;
-  position: sticky;
-  top: 80px;  /* You may tweak this */
-  height: 60vh;
-}
-
-#scatter-plot svg {
-  width: 100%;
-  height: 100%;
+  fill: #B91C1C;
 }
