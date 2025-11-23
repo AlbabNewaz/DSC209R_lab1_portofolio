@@ -316,7 +316,6 @@ html[data-color-scheme='dark'] .resume section {
 /* Left side = text */
 #file-story {
   flex: 1;
-  position: relative;
 }
 
 /* Right side = sticky commit timeline */
@@ -325,8 +324,7 @@ html[data-color-scheme='dark'] .resume section {
   position: sticky;
   top: 80px;      /* same as scatter-plot */
   height: 60vh;   /* required for sticky */
-  overflow-y: auto;
-  padding-right: 1rem;
+
 }
 
 /* ---------------- FILES LAYOUT ---------------- */
