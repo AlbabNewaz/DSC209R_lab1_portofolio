@@ -1,5 +1,6 @@
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
-import scrollama from 'https://cdn.jsdelivr.net/npm/scrollama@3.2.0/+esm';
+
+import scrollama from 'https://cdn.jsdelivr.net/npm/scrollama@3.2.0/+esm'
 
 const csvPath = "./loc.csv";
 
@@ -35,20 +36,15 @@ const selectionBox = d3.select("#selection-summary");
 const data = await d3.csv(csvPath, d => {
   const [h, m, s] = d.time.split(":").map(Number);
   return {
-    id: d.commit + "_" + d.line, // unique id
+    id: d.commit + "_" + d.line,   // unique id for stable circles
     file: d.file,
     type: d.type,
     commit: d.commit,
     date: new Date(d.date),
-    datetime: new Date(d.datetime),
     minutes: h * 60 + m + s / 60,
-    lines: +d.length,
-    url: `https://github.com/YourRepo/commit/${d.commit}`,
+    lines: +d.length
   };
 });
-
-// Sort commits by datetime for scrollytelling
-data.sort((a, b) => a.datetime - b.datetime);
 
 // Global color scale for technology types
 const typeColors = d3.scaleOrdinal(d3.schemeTableau10)
@@ -97,7 +93,7 @@ g.append("g")
   .attr("font-size", "14px")
   .text("Time (HH:MM)");
 
-// Circle radius
+// Circle radius based on commit count
 const commitCount = d3.rollup(data, v => v.length, d => d.commit);
 const radius = d => Math.sqrt(commitCount.get(d.commit) || 1) * 2;
 
@@ -113,7 +109,7 @@ function renderCircles(commits) {
       enter => enter.append("circle")
                     .attr("r", 0)
                     .call(enter => enter.transition().attr("r", d => radius(d))),
-      update => update.transition().duration(400).attr("r", d => radius(d)),
+      update => update.transition().attr("r", d => radius(d)),
       exit => exit.remove()
     )
     .transition()
@@ -193,54 +189,76 @@ function updateAxes(commits) {
   g.select("g.y-axis").transition().duration(400).call(yAxis);
 }
 
-// -------------------- SCROLLAMA --------------------
-const storyContainer = d3.select('#scatter-story');
+// Slider
+const slider = d3.select("#commit-progress");
+const commitTimeDisplay = d3.select("#commit-time");
 
-storyContainer.selectAll('.step')
-  .data(data)
-  .join('div')
-  .attr('class', 'step')
-  .html((d, i) => `
-    On ${d.datetime.toLocaleString('en', { dateStyle: 'full', timeStyle: 'short' })},
-    I made <a href="${d.url}" target="_blank">${
-      i > 0 ? 'another glorious commit' : 'my first commit, and it was glorious'
-    }</a>.
-    I edited ${d.totalLines || 1} lines across ${
-      d3.rollups(
-        d.lines,
-        (D) => D.length,
-        (d) => d.file
-      ).length
-    } files.
-    Then I looked over all I had made, and I saw that it was very good.
-  `);
+slider.on("input", function() {
+  const commitProgress = +this.value;
+  const minDate = d3.min(data, d => d.date);
+  const maxDate = d3.max(data, d => d.date);
+  const commitMaxTime = new Date(minDate.getTime() + (maxDate - minDate) * (commitProgress / 100));
 
-// Initialize Scrollama
-const scroller = scrollama();
+  commitTimeDisplay.text(commitMaxTime.toDateString());
 
-function onStepEnter(response) {
-  const commitData = response.element.__data__;
-  const filteredCommits = data.filter(d => d.datetime <= commitData.datetime);
+  const filteredCommits = data.filter(d => d.date <= commitMaxTime);
 
   updateAxes(filteredCommits);
   renderCircles(filteredCommits);
   updateFileDisplay(filteredCommits);
   updateSelectionSummary(filteredCommits);
-}
-
-scroller.setup({
-  container: '#scrolly-1',
-  step: '#scrolly-1 .step',
-})
-.onStepEnter(onStepEnter);
+});
 
 // Initial render
 renderCircles(data);
 updateFileDisplay(data);
 updateSelectionSummary(data);
+
+// Summary
+const filesSet = new Set(data.map(d => d.file));
+const langsSet = new Set(data.map(d => d.type));
 summaryBox.html(`
   <h2>Summary</h2>
-  Files: ${new Set(data.map(d => d.file)).size}<br>
-  Languages: ${new Set(data.map(d => d.type)).size}<br>
+  Files: ${filesSet.size}<br>
+  Languages: ${langsSet.size}<br>
   Total Commits: ${data.length}
 `);
+
+
+d3.select('#scatter-story')
+  .selectAll('.step')
+  .data(commits)
+  .join('div')
+  .attr('class', 'step')
+  .html(
+    (d, i) => `
+		On ${d.datetime.toLocaleString('en', {
+      dateStyle: 'full',
+      timeStyle: 'short',
+    })},
+		I made <a href="${d.url}" target="_blank">${
+      i > 0 ? 'another glorious commit' : 'my first commit, and it was glorious'
+    }</a>.
+		I edited ${d.totalLines} lines across ${
+      d3.rollups(
+        d.lines,
+        (D) => D.length,
+        (d) => d.file,
+      ).length
+    } files.
+		Then I looked over all I had made, and I saw that it was very good.
+	`,
+  );
+
+
+  function onStepEnter(response) {
+  console.log(response);
+}
+
+const scroller = scrollama();
+scroller
+  .setup({
+    container: '#scrolly-1',
+    step: '#scrolly-1 .step',
+  })
+  .onStepEnter(onStepEnter);
