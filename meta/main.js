@@ -34,7 +34,7 @@ const selectionBox = d3.select("#selection-summary");
 const data = await d3.csv(csvPath, d => {
   const [h, m, s] = d.time.split(":").map(Number);
   return {
-    id: d.commit + "_" + d.file + "_" + d.line, // unique id per line
+    id: d.commit + "_" + d.line,   // unique id for stable circles
     file: d.file,
     type: d.type,
     commit: d.commit,
@@ -43,6 +43,10 @@ const data = await d3.csv(csvPath, d => {
     lines: +d.length
   };
 });
+
+// Global color scale for technology types
+const typeColors = d3.scaleOrdinal(d3.schemeTableau10)
+  .domain([...new Set(data.map(d => d.type))]);
 
 // Scales
 const x = d3.scaleTime()
@@ -54,8 +58,6 @@ const y = d3.scaleLinear()
   .domain(d3.extent(data, d => d.minutes))
   .range([innerH, 0])
   .nice();
-
-const color = d3.scaleOrdinal(d3.schemeTableau10);
 
 // Axes
 const xAxis = d3.axisBottom(x).tickFormat(d3.timeFormat("%b %d"));
@@ -104,53 +106,24 @@ function renderCircles(commits) {
     .join(
       enter => enter.append("circle")
                     .attr("r", 0)
-                    .attr("cx", d => x(d.date))
-                    .attr("cy", d => y(d.minutes))
-                    .attr("fill", d => color(d.type))
-                    .attr("opacity", 0.8)
                     .call(enter => enter.transition().attr("r", d => radius(d))),
-      update => update.transition()
-                      .duration(300)
-                      .attr("cx", d => x(d.date))
-                      .attr("cy", d => y(d.minutes))
-                      .attr("r", d => radius(d))
-                      .attr("fill", d => color(d.type)),
-      exit => exit.transition().attr("r", 0).remove()
+      update => update.transition().attr("r", d => radius(d)),
+      exit => exit.remove()
     )
-    .on("mouseover", (e, d) => {
-      tooltip.style("opacity", 1)
-        .html(`
-          <strong>File:</strong> ${d.file}<br>
-          <strong>Language:</strong> ${d.type}<br>
-          <strong>Date:</strong> ${d.date.toLocaleDateString()}<br>
-          <strong>Time:</strong> ${Math.floor(d.minutes/60).toString().padStart(2,"0")}:${Math.floor(d.minutes%60).toString().padStart(2,"0")}<br>
-          <strong>Lines:</strong> ${d.lines}<br>
-          <strong>Commit:</strong> ${d.commit}
-        `)
-        .style("left", e.pageX + 15 + "px")
-        .style("top", e.pageY + "px");
-    })
-    .on("mouseout", () => tooltip.style("opacity", 0));
-}
-
-// Function to update axes
-function updateAxes(commits) {
-  x.domain(d3.extent(commits, d => d.date));
-  y.domain(d3.extent(commits, d => d.minutes));
-
-  g.select("g.x-axis").transition().duration(300).call(xAxis);
-  g.select("g.y-axis").transition().duration(300).call(yAxis);
+    .transition()
+    .duration(400)
+    .attr("cx", d => x(d.date))
+    .attr("cy", d => y(d.minutes))
+    .attr("fill", d => typeColors(d.type))
+    .attr("opacity", 0.8);
 }
 
 // File display
 function updateFileDisplay(filteredCommits) {
   const lines = filteredCommits;
-  
   const files = d3.groups(lines, d => d.file)
     .map(([name, lines]) => ({ name, lines }))
     .sort((a, b) => b.lines.length - a.lines.length);
-
-  const colors = d3.scaleOrdinal(d3.schemeTableau10);
 
   const filesContainer = d3.select("#files")
     .selectAll("div")
@@ -165,14 +138,17 @@ function updateFileDisplay(filteredCommits) {
     );
 
   filesContainer.select("dt > code")
-    .html(d => `${d.name}<br><small>${d.lines.length} lines</small>`);
+    .text(d => `${d.name} `)
+    .append("small")
+    .text(d => `${d.lines.length} lines`);
 
+  // Unit visualization per line
   filesContainer.select("dd")
     .selectAll("div")
     .data(d => d.lines)
     .join("div")
     .attr("class", "loc")
-    .attr("style", d => `background-color: ${colors(d.type)}`);
+    .style("background-color", d => typeColors(d.type));
 }
 
 // Selection summary
@@ -200,6 +176,15 @@ function updateSelectionSummary(filteredCommits) {
 
   html += `</div>`;
   selectionBox.html(html);
+}
+
+// Update axes
+function updateAxes(commits) {
+  x.domain(d3.extent(commits, d => d.date));
+  y.domain(d3.extent(commits, d => d.minutes));
+
+  g.select("g.x-axis").transition().duration(400).call(xAxis);
+  g.select("g.y-axis").transition().duration(400).call(yAxis);
 }
 
 // Slider
