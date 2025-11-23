@@ -370,3 +370,42 @@ circle:hover {
 circle.selected {
   fill: #B91C1C;
 }
+
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.stat-card {
+  background-color: oklch(98% 2% 200 / 50%);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+html[data-color-scheme='dark'] .stat-card {
+  background-color: oklch(15% 5% 240 / 70%);
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: oklch(50% 10% 200 / 80%);
+}
+
+html[data-color-scheme='dark'] .stat-label {
+  color: #ccc;
+}

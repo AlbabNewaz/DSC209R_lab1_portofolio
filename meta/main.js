@@ -54,30 +54,30 @@ function processCommits(data) {
 function renderCommitInfo(data, commits){
     const totalLOC = data.length;
     const filesCount = d3.group(data, d => d.file).size;
-             
     const longestLineChars = d3.max(data, d => d.length ?? 0) ?? 0;      
     const linesPerFile = d3.rollup(data, v => v.length, d => d.file);
     const maxLinesInAFile = d3.max(linesPerFile.values()) ?? 0; 
 
     const root = d3.select('#stats');
-    root.selectAll('*').remove();
+    root.selectAll('*').remove(); // Clear old stats
 
-    const card = root.append('div').attr('class','stats-card');
-    const grid = card.append('div').attr('class','stats-grid');
+    const statsData = [
+        { label: 'Files', value: filesCount },
+        { label: 'Total LOC', value: totalLOC },
+        { label: 'Longest Line', value: longestLineChars, sub: 'characters' },
+        { label: 'Max Lines', value: maxLinesInAFile, sub: 'in a file' },
+    ];
 
-   
-    const add = (label, value, sub='') => {
-        const s = grid.append('div').attr('class','stat');
-        s.append('div').attr('class','label').text(label);
-        s.append('div').attr('class','value').text(value);
-        if (sub) s.append('div').attr('class','sub').text(sub);
-    };
-    add('FILES', filesCount);
-    add('TOTAL LOC', totalLOC);
-    add('LONGEST LINE', longestLineChars, 'characters');
-    add('MAX LINES', maxLinesInAFile, 'in a single file');
+    const grid = root.append('div').attr('class', 'stats-grid');
 
+    statsData.forEach(d => {
+        const card = grid.append('div').attr('class','stat-card');
+        card.append('div').attr('class','stat-value').text(d.value);
+        card.append('div').attr('class','stat-label').text(d.label);
+        if(d.sub) card.append('div').attr('class','stat-sub').text(d.sub);
+    });
 }
+
 
 const commit_tooltip = document.getElementById('commit-tooltip');
 const commit_link = document.getElementById('commit-link');
